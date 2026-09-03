@@ -54,7 +54,7 @@ export default function Hero() {
   }, [mouseX, mouseY]);
 
   return (
-    <section className="relative w-full h-[80vh] flex flex-col-reverse md:flex-row items-center justify-between mt-10 overflow-hidden">
+    <section className="relative w-full min-h-[80vh] md:h-[80vh] flex flex-col-reverse md:flex-row items-center justify-between mt-6 md:mt-10 overflow-hidden">
       {/* Ambient glow blobs behind everything */}
       <motion.div
         aria-hidden
@@ -90,7 +90,7 @@ export default function Hero() {
 
         <motion.h1
           variants={item}
-          className="text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-tight"
+          className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-tight"
         >
           A fully interactive <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 bg-[length:200%_auto] animate-[gradient-shift_6s_ease_infinite]">
@@ -132,7 +132,7 @@ export default function Hero() {
       >
         <motion.div
           style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-          className="w-full h-full relative flex items-center justify-center"
+          className="w-full h-full relative flex items-center justify-center overflow-hidden rounded-2xl"
         >
           {!splineLoaded && (
             <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
@@ -153,7 +153,9 @@ export default function Hero() {
           <iframe 
             src="https://my.spline.design/cube-1e07b8cd37c1fffae2b170e5ee35d97f/" 
             onLoad={() => setSplineLoaded(true)}
-            className="w-full h-full border-none pointer-events-auto"
+            className="w-full h-full border-none pointer-events-auto overflow-hidden"
+            style={{ overflow: "hidden" }}
+            scrolling="no"
             title="3D Experience"
           />
         </motion.div>
