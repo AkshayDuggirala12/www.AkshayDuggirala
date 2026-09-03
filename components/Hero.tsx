@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Spline from "@splinetool/react-spline";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 // Stagger container for the left-side text block
@@ -56,7 +55,7 @@ export default function Hero() {
 
   return (
     <section className="relative w-full h-[80vh] flex flex-col-reverse md:flex-row items-center justify-between mt-10 overflow-hidden">
-      {/* Ambient glow blobs behind everything, matches the blue/purple gradient theme */}
+      {/* Ambient glow blobs behind everything */}
       <motion.div
         aria-hidden
         className="pointer-events-none absolute -top-32 -left-32 w-[28rem] h-[28rem] rounded-full bg-blue-500/20 blur-[120px]"
@@ -120,7 +119,7 @@ export default function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Right Side: 3D Spline Scene with mouse-parallax tilt */}
+      {/* Right Side: Spline Iframe Embed with mouse-parallax tilt */}
       <motion.div
         ref={wrapperRef}
         onMouseMove={handleMouseMove}
@@ -129,16 +128,16 @@ export default function Hero() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
         style={{ perspective: 1000 }}
-        className="w-full md:w-1/2 h-[400px] md:h-full relative"
+        className="w-full md:w-1/2 h-[400px] md:h-full relative flex items-center justify-center"
       >
         <motion.div
           style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-          className="w-full h-full relative"
+          className="w-full h-full relative flex items-center justify-center"
         >
           {!splineLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
               <motion.div
-                className="relative w-48 h-48 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 font-semibold"
+                className="relative w-48 h-48 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 font-semibold shadow-2xl"
                 animate={{ boxShadow: [
                   "0 0 20px 0px rgba(96,165,250,0.25)",
                   "0 0 40px 10px rgba(168,85,247,0.25)",
@@ -146,14 +145,16 @@ export default function Hero() {
                 ] }}
                 transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
               >
-                Rendering 3D...
+                Loading 3D...
               </motion.div>
             </div>
           )}
 
-          <Spline
-            scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
+          <iframe 
+            src="https://my.spline.design/cube-1e07b8cd37c1fffae2b170e5ee35d97f/" 
             onLoad={() => setSplineLoaded(true)}
+            className="w-full h-full border-none pointer-events-auto"
+            title="3D Experience"
           />
         </motion.div>
       </motion.div>
