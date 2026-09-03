@@ -22,7 +22,7 @@ export default function Projects() {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:8000/projects");
+      const response = await axios.get("https://akshaywebsitebackend.onrender.com/projects");
       setProjects(response.data);
       setIsFetched(true);
     } catch (error) {

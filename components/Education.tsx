@@ -19,7 +19,7 @@ export default function Education() {
   const fetchEducationData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://127.0.0.1:8000/education");
+      const response = await axios.get("https://akshaywebsitebackend.onrender.com/education");
       setEducationData(response.data);
       setIsFetched(true);
     } catch (error) {

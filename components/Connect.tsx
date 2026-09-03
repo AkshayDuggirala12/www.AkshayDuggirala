@@ -30,7 +30,7 @@ export default function Connect() {
     };
 
     try {
-      await axios.post("http://localhost:8000/leads", payload);
+      await axios.post("https://akshaywebsitebackend.onrender.com/leads", payload);
       setStatus("success");
       setFormData({ name: "", email: "", service: "General Inquiry", message: "" }); 
       
