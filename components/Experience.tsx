@@ -22,7 +22,7 @@ export default function Experience() {
   const fetchExperience = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://127.0.0.1:8000/experience");
+      const response = await axios.get("https://akshaywebsitebackend.onrender.com/experience");
       setExperiences(response.data);
       setIsFetched(true);
     } catch (error) {
