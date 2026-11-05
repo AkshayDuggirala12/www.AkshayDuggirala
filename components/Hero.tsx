@@ -61,7 +61,7 @@ export default function Hero() {
   return (
     <section
       aria-label="Animated glass office workspace"
-      className="interactive-hero relative left-1/2 w-screen -translate-x-1/2 overflow-hidden"
+      className="interactive-hero relative -mx-6 w-[calc(100%+3rem)] overflow-hidden md:-mx-10 md:w-[calc(100%+5rem)] lg:-mx-16 lg:w-[calc(100%+8rem)] xl:-mx-24 xl:w-[calc(100%+12rem)]"
     >
       <div
         ref={sceneRef}
