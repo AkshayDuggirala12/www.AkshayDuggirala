@@ -1,64 +1,79 @@
 "use client";
 
-import Image from "next/image";
-import { TypeAnimation } from "react-type-animation";
+import { motion } from "framer-motion";
+
+const principles = [
+  {
+    number: "01",
+    title: "Start with the problem",
+    description:
+      "Understand the people and the work behind a challenge before reaching for a technical solution.",
+  },
+  {
+    number: "02",
+    title: "Build to learn",
+    description:
+      "Turn ideas into prototypes, learn from the process, and keep improving what is useful.",
+  },
+  {
+    number: "03",
+    title: "Think beyond launch",
+    description:
+      "Care about the details that make software clear, dependable, and easier to use over time.",
+  },
+];
 
 export default function About() {
   return (
-    <section id="about" className="w-full min-h-screen py-24 flex flex-col md:flex-row items-center justify-between gap-12 border-t border-white/5">
-      
-      {/* Left Side: Text & Typing Animation */}
-      <div className="w-full md:w-1/2 flex flex-col gap-6">
-        <h2 className="text-sm md:text-base font-bold uppercase tracking-widest text-gray-500">
-          01. About Me
-        </h2>
-        
-        {/* The Typing Animation */}
-        <div className="text-2xl md:text-4xl font-bold text-white h-20 md:h-24">
-          <TypeAnimation
-            sequence={[
-              "I build scalable backends. using fastapi, nodejs, and django.",
-              1500,
-              "I craft modern React frontends. still learning nextjs and tailwindcss.",
-              1500,
-              "learning 3d animations for web and mobile. using threejs and react-three-fiber.",
-              1500,
-              "using tresding ai agent to automate tasks. and build ai powered applications.",
-              1500,
-              "I solve real business problems. with smart solutions. using scalable architectures.",
-              1500,
-              "I am a learning devops engineer. using docker, kubernetes, and ci/cd pipelines.",
-              1500,
-              "bring my own ideas for exsting business problems. and build innovative solutions. coming soon.",
-            ]}
-            wrapper="span"
-            speed={50}
-            className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500"
-            repeat={Infinity}
-          />
+    <section
+      id="about"
+      className="w-full border-t border-white/10 py-20 md:py-28"
+    >
+      <div className="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:gap-16">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-300">
+            About me
+          </p>
+          <h2 className="mt-4 text-4xl font-semibold leading-tight tracking-tight text-white md:text-5xl">
+            Curious about how things can work better.
+          </h2>
         </div>
-
-        {/* Your About Me Paragraph */}
-        <p className="text-gray-400 text-lg leading-relaxed">
-          I'm a full-stack and Android developer fresh out of KL University.
-           I focus on building real-world web apps, clean APIs, and mobile platforms. 
-           Right now, I'm leveling up my UI design, exploring AI workflows, and learning 3D web animations.
-        </p>
-      </div>
-
-      {/* Right Side: Your Latest Image */}
-      <div className="w-full md:w-1/2 flex justify-center md:justify-end">
-        <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-          {/* Make sure your image in the public folder is named profile.jpg */}
-          <Image 
-            src="/profile.jpg" 
-            alt="Akshay Duggirala" 
-            fill 
-            className="object-cover hover:scale-105 transition-transform duration-500"
-          />
+        <div className="flex flex-col gap-5 text-lg leading-relaxed text-slate-300">
+          <p>
+            I’m Akshay, a software engineer who enjoys bringing ideas to life
+            across web, backend, and mobile. I’m interested in the space where
+            thoughtful engineering meets the everyday problems people face.
+          </p>
+          <p>
+            Alongside my role at Vivid Minds (Quixy), I’m exploring an
+            early-stage product idea around flexible local work. This site is
+            where I share the work, lessons, and ideas behind that journey.
+          </p>
         </div>
       </div>
 
+      <div className="mt-14 grid gap-4 md:mt-20 md:grid-cols-3">
+        {principles.map((principle, index) => (
+          <motion.article
+            key={principle.number}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.4, delay: index * 0.08 }}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-7"
+          >
+            <p className="text-sm font-bold tracking-widest text-blue-300">
+              {principle.number}
+            </p>
+            <h3 className="mt-6 text-xl font-bold text-white">
+              {principle.title}
+            </h3>
+            <p className="mt-3 leading-relaxed text-slate-400">
+              {principle.description}
+            </p>
+          </motion.article>
+        ))}
+      </div>
     </section>
   );
 }

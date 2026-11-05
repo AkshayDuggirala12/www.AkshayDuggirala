@@ -36,15 +36,13 @@ export default function Experience() {
     <section id="experience" className="w-full py-24 border-t border-white/5 min-h-[40vh]">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
         <div>
-          <h2 className="text-sm md:text-base font-bold uppercase tracking-widest text-gray-500 mb-2">
-            03. Work History
+          <h2 className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-blue-300 mb-3">
+            Experience
           </h2>
           <p className="text-2xl md:text-3xl font-bold text-white">
-            Professional Experience & Live Deployments
+            Growing through product engineering
           </p>
         </div>
-
-        {/* Micro-Interaction Button */}
         {!isFetched && !loading && (
           <motion.button
             onClick={fetchExperience}
@@ -52,7 +50,7 @@ export default function Experience() {
             whileTap={{ scale: 0.95 }}
             className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-sm font-semibold text-white hover:bg-white/10 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all flex items-center gap-2 self-start md:self-auto"
           >
-            <span>Load Work History</span>
+            <span>Load additional experience</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -61,6 +59,35 @@ export default function Experience() {
           </motion.button>
         )}
       </div>
+
+      <motion.article
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mb-6 rounded-2xl border border-blue-300/20 bg-blue-300/[0.05] p-6 md:p-8"
+      >
+        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-start">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-blue-200">
+              October 2026 — Present
+            </p>
+            <h3 className="mt-3 text-2xl font-bold text-white">
+              Associate Software Engineer
+            </h3>
+            <p className="mt-1 text-lg text-slate-300">
+              Vivid Minds <span className="text-slate-500">·</span> Quixy
+            </p>
+          </div>
+          <span className="w-fit rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1 text-xs font-semibold text-blue-200">
+            Current role
+          </span>
+        </div>
+        <p className="mt-5 max-w-3xl leading-relaxed text-slate-300">
+          The beginning of my career in a product-based company. I’m looking
+          forward to learning from the people, product, and engineering work
+          around me.
+        </p>
+      </motion.article>
 
       {loading && (
         <div className="flex justify-center items-center py-12">

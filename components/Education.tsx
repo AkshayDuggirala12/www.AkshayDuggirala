@@ -31,8 +31,8 @@ export default function Education() {
 
   return (
     <section id="education" className="w-full py-24 border-t border-white/5 min-h-[40vh]">
-      <h2 className="text-sm md:text-base font-bold uppercase tracking-widest text-gray-500 mb-12">
-        02. Education & Qualifications
+      <h2 className="mb-12 text-xs font-bold uppercase tracking-[0.2em] text-blue-300 md:text-sm">
+        Education
       </h2>
 
       {/* State 1: The Interactive Button */}

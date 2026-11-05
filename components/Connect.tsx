@@ -48,22 +48,24 @@ export default function Connect() {
         
         {/* Left Side: Text and Info */}
         <div className="w-full md:w-1/2 flex flex-col gap-6">
-          <h2 className="text-sm md:text-base font-bold uppercase tracking-widest text-gray-500">
-            05. Get to Work
+          <h2 className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-blue-300">
+            Get in touch
           </h2>
           <h3 className="text-4xl md:text-5xl font-extrabold text-white">
-            Talk is cheap. <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Execution matters.</span>
+            Have a problem worth solving?
           </h3>
           <p className="text-gray-400 text-lg">
-            Ideas are great, but shipping the actual product is the only thing that counts. I write code and build functional mobile and web applications. If you are ready to skip the fluff and turn a concept into a working reality, let's build it.
+            If you’re working through a business challenge, exploring a product
+            idea, or simply want to connect, I’d be glad to hear from you. Share
+            a little context and we can start a conversation.
           </p>
           
-          <div className="mt-8 p-6 bg-white/5 border border-white/10 rounded-2xl w-max flex flex-col gap-3">
+          <div className="mt-8 flex w-fit max-w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6">
             <p className="text-sm text-gray-500 font-semibold uppercase tracking-wider">Direct Contact</p>
             <p className="text-sm text-gray-400 max-w-sm leading-relaxed">
-              Note: The backend server might occasionally be in sleep mode to optimize hosting costs. You can always reach me directly using the details below.
+              Prefer email? You can reach me directly here.
             </p>
-            <div className="flex flex-col gap-1 mt-2">
+            <div className="mt-2 flex flex-col gap-1">
               <a href="mailto:2100031105cseh@gmail.com" className="text-lg font-bold text-white hover:text-blue-400 transition-colors">
                 2100031105cseh@gmail.com
               </a>
@@ -109,7 +111,6 @@ export default function Connect() {
               />
             </div>
 
-            {/* NEW: Services Dropdown */}
             <div className="flex flex-col gap-1.5">
               <label htmlFor="service" className="text-sm font-medium text-gray-400 ml-1">How can I help you?</label>
               <div className="relative">
@@ -121,6 +122,7 @@ export default function Connect() {
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors appearance-none cursor-pointer"
                 >
                   <option value="General Inquiry">General Inquiry</option>
+                  <option value="Business Problem">Business Problem / Product Discussion</option>
                   <option value="Full-Stack Web App">Full-Stack Web App Development</option>
                   <option value="Backend & API Architecture">Backend & API Architecture</option>
                   <option value="Native Android App">Native Android App (Kotlin)</option>

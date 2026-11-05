@@ -11,17 +11,20 @@ export default function Home() {
     <main className="min-h-screen px-6 md:px-10 lg:px-16 xl:px-24 pb-24">
       <Navbar />
 
-      {/* Page 1: Hero */}
       <Hero />
-
-      {/* Page 2: About Me */}
       <About />
-      <Education />
-      <Journey />
       <Experience />
       <Projects />
-      
+      <Journey />
+      <Education />
       <Connect />
+
+      <footer className="border-t border-white/10 py-8 text-sm text-slate-500">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row">
+          <p>© {new Date().getFullYear()} Akshay Duggirala</p>
+          <p>Building thoughtfully, one step at a time.</p>
+        </div>
+      </footer>
     </main>
   );
 }
