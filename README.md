@@ -43,11 +43,17 @@ notes](../backend/README.md) for the required Python and PostgreSQL environment 
 - Daily page counts are aggregate counts by route; the site does not store visitor IP addresses or
   identity.
 
-## Hosting
+## Hosting on BigRock
 
-This is a Next.js application. A BigRock plan must support running a Node.js app for the standard
-`npm run build` and `npm run start` deployment. Backend hosting additionally requires Python and
-PostgreSQL support; otherwise, the existing API can remain hosted separately.
+The site is configured for static export. Run `npm run build` and upload the **contents** of the
+generated `out/` folder to the domain's `public_html` directory in BigRock cPanel. The trailing
+slash routes export as folders with `index.html`, so paths such as `/careers/apply/` work with
+standard static hosting.
+
+The website's forms, applicant portal, hiring dashboard, and visit counters still require the
+FastAPI API and PostgreSQL database. Keep those on a Python-capable API host with persistent
+PostgreSQL; the frontend can point to it via `NEXT_PUBLIC_API_BASE_URL` before the build. Do not
+upload the backend `.env` or put admin/SMTP/database secrets in the frontend.
 
 ## Learn More
 
