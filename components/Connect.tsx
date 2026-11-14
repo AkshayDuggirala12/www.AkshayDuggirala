@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
+import { api } from "../lib/api";
 
 export default function Connect() {
   const [formData, setFormData] = useState({
@@ -30,7 +30,7 @@ export default function Connect() {
     };
 
     try {
-      await axios.post("https://akshaywebsitebackend.onrender.com/leads", payload);
+      await api.post("/leads", payload);
       setStatus("success");
       setFormData({ name: "", email: "", service: "General Inquiry", message: "" }); 
       
@@ -43,36 +43,36 @@ export default function Connect() {
   };
 
   return (
-    <section id="connect" className="w-full py-24 border-t border-white/5 min-h-[60vh]">
-      <div className="flex flex-col md:flex-row justify-between gap-12">
+    <section id="connect" className="mx-auto w-full max-w-7xl border-t border-slate-200 py-20 md:py-28">
+      <div className="flex flex-col justify-between gap-12 md:flex-row">
         
         {/* Left Side: Text and Info */}
         <div className="w-full md:w-1/2 flex flex-col gap-6">
-          <h2 className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-blue-300">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700 md:text-sm">
             Get in touch
           </h2>
-          <h3 className="text-4xl md:text-5xl font-extrabold text-white">
+          <h3 className="text-4xl font-extrabold text-slate-950 md:text-5xl">
             Have a problem worth solving?
           </h3>
-          <p className="text-gray-400 text-lg">
+          <p className="text-lg text-slate-600">
             If you’re working through a business challenge, exploring a product
             idea, or simply want to connect, I’d be glad to hear from you. Share
             a little context and we can start a conversation.
           </p>
           
-          <div className="mt-8 flex w-fit max-w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6">
-            <p className="text-sm text-gray-500 font-semibold uppercase tracking-wider">Direct Contact</p>
-            <p className="text-sm text-gray-400 max-w-sm leading-relaxed">
+          <div className="mt-8 flex w-fit max-w-full flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Direct Contact</p>
+            <p className="max-w-sm text-sm leading-relaxed text-slate-600">
               Prefer email? You can reach me directly here.
             </p>
             <div className="mt-2 flex flex-col gap-1">
-              <a href="mailto:2100031105cseh@gmail.com" className="text-lg font-bold text-white hover:text-blue-400 transition-colors">
+              <a href="mailto:2100031105cseh@gmail.com" className="text-lg font-bold text-slate-900 transition-colors hover:text-teal-700">
                 2100031105cseh@gmail.com
               </a>
-              <a href="tel:+919346267529" className="text-lg font-bold text-white hover:text-blue-400 transition-colors">
+              <a href="tel:+919346267529" className="text-lg font-bold text-slate-900 transition-colors hover:text-teal-700">
                 +91 9346267529
               </a>
-              <a href="tel:+919346267529" className="text-lg font-bold text-white hover:text-blue-400 transition-colors">
+              <a href="tel:+919398460118" className="text-lg font-bold text-slate-900 transition-colors hover:text-teal-700">
                 +91 9398460118
               </a>
             </div>
@@ -81,10 +81,10 @@ export default function Connect() {
 
         {/* Right Side: The Form */}
         <div className="w-full md:w-1/2">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-8 bg-white/5 border border-white/10 rounded-3xl shadow-2xl">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg shadow-slate-900/5 sm:p-8">
             
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="name" className="text-sm font-medium text-gray-400 ml-1">Name</label>
+              <label htmlFor="name" className="ml-1 text-sm font-medium text-slate-600">Name</label>
               <input
                 type="text"
                 id="name"
@@ -92,13 +92,13 @@ export default function Connect() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
                 placeholder="John Doe"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-sm font-medium text-gray-400 ml-1">Email</label>
+              <label htmlFor="email" className="ml-1 text-sm font-medium text-slate-600">Email</label>
               <input
                 type="email"
                 id="email"
@@ -106,20 +106,20 @@ export default function Connect() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
                 placeholder="john@company.com"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="service" className="text-sm font-medium text-gray-400 ml-1">How can I help you?</label>
+              <label htmlFor="service" className="ml-1 text-sm font-medium text-slate-600">How can I help you?</label>
               <div className="relative">
                 <select
                   id="service"
                   name="service"
                   value={formData.service}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors appearance-none cursor-pointer"
+                  className="w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 transition-colors focus:border-teal-500 focus:outline-none"
                 >
                   <option value="General Inquiry">General Inquiry</option>
                   <option value="Business Problem">Business Problem / Product Discussion</option>
@@ -131,7 +131,7 @@ export default function Connect() {
                 </select>
                 {/* Custom dropdown arrow */}
                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500">
                     <polyline points="6 9 12 15 18 9"></polyline>
                   </svg>
                 </div>
@@ -139,7 +139,7 @@ export default function Connect() {
             </div>
 
             <div className="flex flex-col gap-1.5 mb-2">
-              <label htmlFor="message" className="text-sm font-medium text-gray-400 ml-1">Project Details</label>
+              <label htmlFor="message" className="ml-1 text-sm font-medium text-slate-600">Project Details</label>
               <textarea
                 id="message"
                 name="message"
@@ -147,7 +147,7 @@ export default function Connect() {
                 rows={4}
                 value={formData.message}
                 onChange={handleChange}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-teal-500 focus:outline-none"
                 placeholder="Tell me a bit about what we are building..."
               ></textarea>
             </div>
@@ -157,10 +157,10 @@ export default function Connect() {
               whileTap={{ scale: 0.98 }}
               disabled={status === "submitting"}
               type="submit"
-              className="w-full py-4 mt-2 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors flex justify-center items-center h-14"
+              className="mt-2 flex h-14 w-full items-center justify-center rounded-xl bg-gradient-to-r from-teal-500 to-sky-600 py-4 font-bold text-white transition hover:brightness-105 disabled:cursor-wait disabled:opacity-70"
             >
               {status === "idle" && "Send Message"}
-              {status === "submitting" && <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>}
+              {status === "submitting" && <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>}
               {status === "success" && "Message Sent! ✓"}
               {status === "error" && "Error Sending ✕"}
             </motion.button>

@@ -20,6 +20,35 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## API configuration
+
+The site uses `https://akshaywebsitebackend.onrender.com` by default. To point it at another API,
+set `NEXT_PUBLIC_API_BASE_URL` to the API's base URL before building the frontend, then rebuild and
+restart the app. For example:
+
+```text
+NEXT_PUBLIC_API_BASE_URL=https://api.example.com
+```
+
+The API must allow the website's origin in its CORS configuration. See the [backend deployment
+notes](../backend/README.md) for the required Python and PostgreSQL environment variables.
+
+## Careers and hiring dashboard
+
+- Candidates apply at `/careers/apply` and check status at `/careers/portal`.
+- Applicants can securely update their submitted profile and PDF resume from the portal.
+- The private hiring dashboard is at `/admin`; it requires the backend `ADMIN_API_KEY`.
+- Applicant email links and hiring notifications require SMTP to be configured on the backend.
+- Application details and PDF resumes are stored by the backend in PostgreSQL.
+- Daily page counts are aggregate counts by route; the site does not store visitor IP addresses or
+  identity.
+
+## Hosting
+
+This is a Next.js application. A BigRock plan must support running a Node.js app for the standard
+`npm run build` and `npm run start` deployment. Backend hosting additionally requires Python and
+PostgreSQL support; otherwise, the existing API can remain hosted separately.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

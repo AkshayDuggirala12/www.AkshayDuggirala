@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { ArrowDownToLine, ArrowUpRight, Smartphone } from "lucide-react";
+import { api } from "../lib/api";
 
 interface ProjectItem {
   id: number;
@@ -18,152 +17,189 @@ export default function Projects() {
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFetched, setIsFetched] = useState(false);
+  const [error, setError] = useState("");
 
   const fetchProjects = async () => {
     setLoading(true);
+    setError("");
     try {
-      const response = await axios.get("https://akshaywebsitebackend.onrender.com/projects");
+      const response = await api.get<ProjectItem[]>("/projects");
+      if (!Array.isArray(response.data)) {
+        throw new Error("The projects service returned an unexpected response.");
+      }
       setProjects(response.data);
       setIsFetched(true);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
+    } catch (fetchError) {
+      console.error("Error fetching projects:", fetchError);
+      setError("More projects could not be loaded. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section id="projects" className="w-full py-24 border-t border-white/5 min-h-[40vh]">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+    <section
+      id="products"
+      className="mx-auto w-full max-w-7xl border-t border-slate-200 py-20 md:py-28"
+    >
+      <div className="mb-10 flex flex-col gap-5 md:mb-12 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-blue-300 mb-3">
-            Product exploration
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700 md:text-sm">
+            Products
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
+            Things I’m building.
           </h2>
-          <p className="text-2xl md:text-3xl font-bold text-white">
-            An idea I’m working on
+          <p className="mt-3 max-w-2xl leading-relaxed text-slate-600">
+            A growing collection of products and experiments. More details are on the way.
           </p>
         </div>
-        {!isFetched && !loading && (
+        {!isFetched && (
           <motion.button
             onClick={fetchProjects}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-sm font-semibold text-white hover:bg-white/10 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all flex items-center gap-2 self-start md:self-auto"
+            disabled={loading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-teal-500 hover:text-teal-700 disabled:cursor-wait disabled:opacity-60"
           >
-            <span>Load other projects</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
+            <ArrowDownToLine size={16} aria-hidden="true" />
+            {loading ? "Loading projects..." : "Load more projects"}
           </motion.button>
         )}
       </div>
 
       <motion.article
-        id="product"
+        id="paddy-brokerage"
         initial={{ opacity: 0, y: 18 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]"
+        className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
       >
         <div className="grid md:grid-cols-[1.05fr_0.95fr]">
           <div className="flex flex-col justify-center p-7 md:p-10 lg:p-12">
-            <span className="w-fit rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-200">
-              Early-stage prototype
+            <span className="w-fit rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-teal-800">
+              Android app
             </span>
-            <h3 className="mt-6 text-3xl font-bold leading-tight text-white md:text-4xl">
-              Making local work easier to find.
+            <h3 className="mt-6 text-3xl font-bold leading-tight text-slate-950 md:text-4xl">
+              StarFreight
             </h3>
-            <p className="mt-5 leading-relaxed text-slate-300">
-              I’m exploring a platform that could help local businesses find
-              workers when they need extra hands, while helping people discover
-              flexible work opportunities nearby.
+            <p className="mt-4 leading-relaxed text-slate-600">
+              A mobile office for paddy brokers and freight agents. Manage digital waybills, keep
+              payee records, and track freight charges, advances, and driver payments.
             </p>
-            <p className="mt-4 leading-relaxed text-slate-400">
-              The idea is still being developed and tested. It isn’t a public
-              service yet; this is an early step toward building a useful
-              product for real people.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-2">
-              {["Local businesses", "Flexible work", "Mobile-first"].map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-medium text-slate-300"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
+            <a
+              href="https://play.google.com/store/apps/details?id=com.ssst.paddybrokerage"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-teal-500 to-sky-600 px-5 py-3 text-sm font-bold text-white transition hover:brightness-105"
+            >
+              View StarFreight on Google Play <ArrowUpRight size={16} aria-hidden="true" />
+            </a>
           </div>
-          <div className="relative min-h-64 overflow-hidden bg-gradient-to-br from-blue-400/20 via-slate-900 to-indigo-400/20 p-7 md:min-h-full md:p-10">
-            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border border-blue-200/10" />
-            <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full border border-blue-200/10" />
-            <div className="relative flex h-full min-h-52 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/40 p-6 backdrop-blur-sm">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
-                  The opportunity
-                </p>
-                <p className="mt-3 max-w-sm text-2xl font-semibold leading-snug text-white">
-                  A busy shop needs a helping hand. A local worker is ready.
-                </p>
-              </div>
-              <p className="mt-8 text-sm text-slate-300">
-                Exploring a better connection between the two.
-              </p>
+          <div className="flex min-h-64 items-center justify-center bg-gradient-to-br from-teal-50 via-sky-50 to-indigo-50 p-8 md:p-12">
+            <div className="flex h-48 w-48 items-center justify-center rounded-[2.5rem] border border-white bg-white/80 text-teal-700 shadow-xl shadow-teal-900/10">
+              <Smartphone size={76} strokeWidth={1.2} aria-hidden="true" />
             </div>
           </div>
         </div>
       </motion.article>
 
-      {loading && (
-        <div className="flex justify-center items-center py-12">
-          <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+      <motion.article
+        id="sremasethu"
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+      >
+        <div className="grid md:grid-cols-[1.05fr_0.95fr]">
+          <div className="flex flex-col justify-center p-7 md:p-10 lg:p-12">
+            <span className="w-fit rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-sky-800">
+              In development · My product
+            </span>
+            <h3 className="mt-6 text-3xl font-bold leading-tight text-slate-950 md:text-4xl">
+              SremaSethu
+            </h3>
+            <p className="mt-4 leading-relaxed text-slate-600">
+              A two-sided local gig platform I’m building. Sethu helps businesses post and manage
+              shifts; Srema helps workers discover nearby gigs, manage active work, and follow their
+              earnings.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-slate-500">
+              The merchant and partner apps are in development. A public product website is planned
+              for the future.
+            </p>
+          </div>
+          <div className="flex min-h-64 items-center justify-center gap-4 bg-gradient-to-br from-sky-50 via-white to-teal-50 p-8 md:p-12">
+            <div className="flex h-36 w-36 flex-col items-center justify-center rounded-[2rem] border border-white bg-white/80 text-slate-800 shadow-lg shadow-sky-900/5">
+              <span className="text-4xl font-black tracking-tight text-sky-700">S</span>
+              <span className="mt-1 text-sm font-bold">Sethu</span>
+              <span className="mt-1 text-xs text-slate-500">For businesses</span>
+            </div>
+            <div className="flex h-36 w-36 flex-col items-center justify-center rounded-[2rem] border border-white bg-white/80 text-slate-800 shadow-lg shadow-teal-900/5">
+              <span className="text-4xl font-black tracking-tight text-teal-700">S</span>
+              <span className="mt-1 text-sm font-bold">Srema</span>
+              <span className="mt-1 text-xs text-slate-500">For partners</span>
+            </div>
+          </div>
         </div>
+      </motion.article>
+
+      {error && (
+        <p role="status" className="mt-5 text-sm font-medium text-rose-700">
+          {error}
+        </p>
       )}
 
-      {isFetched && !loading && (
-        <motion.div 
+      {isFetched && projects.length === 0 && (
+        <p className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+          No additional projects have been published yet.
+        </p>
+      )}
+
+      {isFetched && projects.length > 0 && (
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+          className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2"
         >
           {projects.map((project) => (
-            <motion.div
+            <motion.article
               key={project.id}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-green-500/40 transition-all flex flex-col h-full justify-between group"
+              className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:border-teal-300 hover:shadow-md"
             >
               <div>
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-2xl font-bold text-white group-hover:text-green-400 transition-colors">
-                    {project.title}
-                  </h3>
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <h3 className="text-xl font-bold text-slate-950">{project.title}</h3>
                   {project.link !== "#" && (
-                    <Link href={project.link} target="_blank" className="text-gray-400 hover:text-white transition-colors">
-                      <ExternalLink size={24} />
-                    </Link>
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Open ${project.title}`}
+                      className="text-slate-500 transition-colors hover:text-teal-700"
+                    >
+                      <ArrowUpRight size={20} />
+                    </a>
                   )}
                 </div>
-                <p className="text-gray-300 leading-relaxed mb-6">
-                  {project.description}
-                </p>
+                <p className="leading-relaxed text-slate-600">{project.description}</p>
               </div>
 
-              <div className="flex flex-wrap gap-2 mt-auto">
-                {project.tech_stack.split(",").map((tech, index) => (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {project.tech_stack.split(",").filter(Boolean).map((tech) => (
                   <span
-                    key={index}
-                    className="px-3 py-1 text-xs rounded-md bg-green-500/10 text-green-300 border border-green-500/20 font-mono"
+                    key={tech.trim()}
+                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600"
                   >
                     {tech.trim()}
                   </span>
                 ))}
               </div>
-            </motion.div>
+            </motion.article>
           ))}
         </motion.div>
       )}

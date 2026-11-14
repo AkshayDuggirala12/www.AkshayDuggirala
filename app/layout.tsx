@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import PageViewTracker from "../components/PageViewTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,9 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://akshayduggirala.com"),
   title: "Akshay Duggirala | Software Engineer & Product Builder",
   description:
-    "Meet Akshay Duggirala, an Associate Software Engineer at Vivid Minds (Quixy) building software and exploring products that solve real-world problems.",
+    "Meet Akshay Duggirala, a software engineer and product builder creating thoughtful web, backend, and mobile products.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -24,7 +26,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <PageViewTracker />
+        {children}
+      </body>
     </html>
   );
 }

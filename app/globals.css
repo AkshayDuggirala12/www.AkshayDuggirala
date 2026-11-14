@@ -1,10 +1,45 @@
 @import "tailwindcss";
 
 body {
-  background-color: #09090b;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #111827;
   /* the full-bleed hero uses w-screen; this stops a sideways scrollbar */
   overflow-x: clip;
+}
+
+.trust-marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 5%,
+    #000 95%,
+    transparent
+  );
+}
+
+.trust-marquee__track {
+  display: flex;
+  width: max-content;
+  animation: trust-marquee-scroll 36s linear infinite;
+}
+
+.trust-marquee__group {
+  display: flex;
+  flex: none;
+  gap: 1rem;
+  padding-right: 1rem;
+}
+
+.trust-marquee:hover .trust-marquee__track,
+.trust-marquee:focus-within .trust-marquee__track {
+  animation-play-state: paused;
+}
+
+@keyframes trust-marquee-scroll {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* ───────── hero stage (full width) ───────── */
@@ -13,10 +48,26 @@ body {
   isolation: isolate;
 }
 
+.office-scene-frame {
+  perspective: 1400px;
+}
+
 .office-stage {
   background: #0b1424;
   -webkit-tap-highlight-color: transparent;
   touch-action: pan-y;
+  transform: rotateX(1deg);
+  transform-style: preserve-3d;
+  transition:
+    transform 500ms ease,
+    box-shadow 500ms ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .office-stage:hover {
+    transform: rotateX(0deg) translateY(-3px);
+    box-shadow: 0 32px 70px rgb(15 23 42 / 20%);
+  }
 }
 
 /* soft fade at the bottom so the scene melts into the next section */
@@ -25,7 +76,7 @@ body {
   position: absolute;
   inset: auto 0 0 0;
   height: 14%;
-  background: linear-gradient(to bottom, transparent, #09090b);
+  background: linear-gradient(to bottom, transparent, #0b1424);
   pointer-events: none;
 }
 
@@ -159,6 +210,15 @@ body {
   .breathe,
   .steam,
   .beacon {
+    animation: none;
+  }
+
+  .trust-marquee {
+    overflow-x: auto;
+    mask-image: none;
+  }
+
+  .trust-marquee__track {
     animation: none;
   }
 }

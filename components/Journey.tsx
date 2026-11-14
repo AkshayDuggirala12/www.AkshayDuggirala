@@ -25,16 +25,16 @@ const milestones = [
 
 export default function Journey() {
   return (
-    <section id="journey" className="relative w-full border-t border-white/10 py-20 md:py-28">
+    <section id="journey" className="relative mx-auto w-full max-w-7xl border-t border-slate-200 py-20 md:py-28">
       <div className="flex flex-col md:flex-row gap-16 relative">
         <div className="w-full md:w-1/3 md:sticky md:top-32 md:h-max">
-          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-blue-300">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700">
             The journey
           </h2>
-          <p className="mt-4 text-4xl font-semibold leading-tight tracking-tight text-white md:text-5xl">
+          <p className="mt-4 text-4xl font-semibold leading-tight tracking-tight text-slate-950 md:text-5xl">
             Building, <br className="hidden md:block" />one step at a time.
           </p>
-          <p className="mt-5 max-w-sm leading-relaxed text-slate-400">
+          <p className="mt-5 max-w-sm leading-relaxed text-slate-600">
             A work in progress—shaped by the things I learn, the people I meet,
             and the problems worth solving.
           </p>
@@ -48,18 +48,18 @@ export default function Journey() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, delay: index * 0.15 }}
-              className="relative border-l border-white/10 pb-12 pl-7 last:pb-0 md:pl-9"
+              className="relative border-l border-slate-200 pb-12 pl-7 last:pb-0 md:pl-9"
             >
-              <span className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-blue-300 ring-4 ring-slate-950" />
+              <span className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-teal-600 ring-4 ring-white" />
               <div className="flex flex-col gap-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   {milestone.year}
                 </span>
-                <h3 className="text-2xl font-bold text-white md:text-3xl">
+                <h3 className="text-2xl font-bold text-slate-950 md:text-3xl">
                   {milestone.title}
                 </h3>
               </div>
-              <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-300 md:text-lg">
+              <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">
                 {milestone.paragraph}
               </p>
             </motion.div>
