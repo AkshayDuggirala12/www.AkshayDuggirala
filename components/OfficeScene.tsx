@@ -160,6 +160,63 @@ const STARS = (() => {
   }));
 })();
 
+/* ───────────────────────── look settings (easy switches) ───────────────────────── */
+/** Your reference photo has no glasses. Set to true to put them back. */
+const WEARS_GLASSES = false;
+/** Navy shirt colours (light → dark), matching your reference photo. */
+const JACKET = ["#456BB5", "#2F4F8E", "#18294F"];
+
+/* ───────────────────────── glossy-floor reflections of the city lights ───────────────────────── */
+const FLOOR_STREAKS = (() => {
+  const r = rng(31);
+  return Array.from({ length: 26 }, () => ({
+    x: -250 + r() * 1600,
+    w: 2 + r() * 5,
+    h: 26 + r() * 70,
+    warm: r() < 0.6,
+    o: 0.35 + r() * 0.5,
+  }));
+})();
+
+/* ───────────────────────── voluminous curly hair (built from overlapping curls) ───────────────────────── */
+const HAIR_CURLS = (() => {
+  const r = rng(77);
+  const out: { x: number; y: number; r: number; tone: number }[] = [];
+  const ring = (rx: number, ry: number, cy: number, n: number, rMin: number, rMax: number, t0: number, t1: number) => {
+    for (let i = 0; i < n; i++) {
+      const t = t0 + ((t1 - t0) * (i + r() * 0.6)) / n;
+      out.push({
+        x: 560 + rx * Math.cos(t) + (r() - 0.5) * 3,
+        y: cy + ry * Math.sin(t) + (r() - 0.5) * 3,
+        r: rMin + r() * (rMax - rMin),
+        tone: r(),
+      });
+    }
+  };
+  ring(57, 44, 198, 26, 9, 14, Math.PI * 0.93, Math.PI * 2.07); // outer crown
+  ring(42, 31, 192, 16, 9, 13, Math.PI * 1.05, Math.PI * 1.95); // mid layer
+  ring(24, 17, 190, 8, 8, 12, Math.PI * 1.1, Math.PI * 1.9); // top layer
+  ring(38, 5, 209, 9, 5, 8, Math.PI * 1.08, Math.PI * 1.92); // broken curly hairline
+  return out;
+})();
+
+/* ───────────────────────── walnut wood grain on the desk top ───────────────────────── */
+const WOOD_GRAIN = (() => {
+  const r = rng(5);
+  let d = "";
+  for (let i = 0; i < 24; i++) {
+    const t = (i + 0.5) / 24;
+    const y = 506 + t * 35;
+    const lx = 276 - 46 * t;
+    const rx = 844 + 46 * t;
+    const w = (r() - 0.5) * 2.4;
+    const c1 = lx + (rx - lx) * 0.3;
+    const c2 = lx + (rx - lx) * 0.65;
+    d += `M${lx.toFixed(1)} ${y.toFixed(1)}C${c1.toFixed(1)} ${(y + w).toFixed(1)} ${c2.toFixed(1)} ${(y - w).toFixed(1)} ${rx.toFixed(1)} ${(y + w * 0.4).toFixed(1)}`;
+  }
+  return d;
+})();
+
 function RealisticCity({ layer, filter, opacity = 1 }: { layer: Layer; filter?: string; opacity?: number }) {
   return (
     <g filter={filter} opacity={opacity}>
@@ -210,74 +267,87 @@ function RealisticCity({ layer, filter, opacity = 1 }: { layer: Layer; filter?: 
   );
 }
 
-/* ───────────────────────── organic botanical plants ───────────────────────── */
-type MonsteraLeafProps = { x: number; y: number; r: number; s: number; flip?: boolean; shade: "dark" | "mid" | "light" };
+/* ───────────────────────── plants ───────────────────────── */
+type Leaf = { x: number; y: number; r: number; s: number; shade: "dark" | "mid" | "light" };
+const shadeFill = (s: Leaf["shade"]) =>
+  s === "dark" ? "url(#botanical-dark)" : s === "mid" ? "url(#botanical-mid)" : "url(#botanical-light)";
 
-function OrganicLeaf({ x, y, r, s, flip = false, shade }: MonsteraLeafProps) {
-  const fillId = shade === "dark" ? "url(#botanical-dark)" : shade === "mid" ? "url(#botanical-mid)" : "url(#botanical-light)";
+/** Broad glossy fiddle-leaf-fig leaf with midrib and side veins. */
+function FigLeaf({ x, y, r, s, shade }: Leaf) {
   return (
-    <g transform={`translate(${x} ${y}) rotate(${r}) scale(${flip ? -s : s} ${s})`}>
+    <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`}>
       <path
-        d="M0 0
-           C-8 -6 -22 -18 -26 -36
-           C-20 -35 -12 -32 -9 -30
-           C-14 -38 -27 -46 -27 -62
-           C-19 -60 -11 -56 -8 -53
-           C-13 -62 -24 -72 -21 -86
-           C-16 -100 -5 -112 2 -118
-           C10 -110 21 -96 23 -80
-           C16 -77 10 -72 7 -68
-           C13 -70 23 -66 25 -52
-           C17 -50 10 -46 7 -42
-           C14 -43 24 -36 22 -22
-           C19 -10 9 -3 0 0Z"
-        fill={fillId}
+        d="M0 0C-5 -4 -17 -10 -21 -27C-25 -44 -14 -64 0 -74C14 -64 25 -44 21 -27C17 -10 5 -4 0 0Z"
+        fill={shadeFill(shade)}
+        stroke="#8FC49B"
+        strokeOpacity=".3"
+        strokeWidth=".9"
       />
+      <path d="M-13 -30C-11 -47 -5 -60 3 -67C-1 -52 -3 -40 -7 -27Z" fill="#fff" fillOpacity=".09" />
+      <path d="M0 -2C1 -26 0 -52 0 -72" stroke="#B9E0BF" strokeOpacity=".5" strokeWidth="1.5" strokeLinecap="round" />
       <path
-        d="M2 -118C10 -110 21 -96 23 -80C15 -50 11 -22 0 0C6 -36 6 -82 2 -118Z"
-        fill="#fff"
-        fillOpacity=".06"
-      />
-      <path d="M0 0C2 -38 3 -78 2 -114" stroke="#6E9975" strokeOpacity=".45" strokeWidth="1.6" strokeLinecap="round" />
-      <path
-        d="M1 -20C-6 -24 -14 -28 -20 -33
-           M2 -44C-5 -48 -14 -52 -20 -58
-           M2 -68C-4 -73 -11 -78 -16 -83
-           M1 -26C7 -30 13 -33 18 -36
-           M2 -50C8 -54 14 -58 19 -61
-           M2 -74C7 -78 13 -82 17 -86"
-        stroke="#6E9975"
-        strokeOpacity=".25"
-        strokeWidth="1"
+        d="M0 -14L-15 -24M0 -26L-18 -38M0 -38L-16 -52M0 -50L-10 -62M0 -14L15 -24M0 -26L18 -38M0 -38L16 -52M0 -50L10 -62"
+        stroke="#B9E0BF"
+        strokeOpacity=".22"
+        strokeWidth=".9"
         strokeLinecap="round"
       />
     </g>
   );
 }
 
-const LEFT_PLANT_LEAVES: MonsteraLeafProps[] = [
-  { x: 142, y: 608, r: -78, s: 0.72, flip: false, shade: "dark" },
-  { x: 174, y: 602, r: 74, s: 0.75, flip: true, shade: "dark" },
-  { x: 136, y: 572, r: -58, s: 0.88, flip: false, shade: "mid" },
-  { x: 180, y: 564, r: 56, s: 0.85, flip: true, shade: "mid" },
-  { x: 148, y: 536, r: -38, s: 0.94, flip: false, shade: "light" },
-  { x: 172, y: 528, r: 42, s: 0.92, flip: true, shade: "mid" },
-  { x: 144, y: 498, r: -24, s: 0.86, flip: false, shade: "mid" },
-  { x: 168, y: 492, r: 26, s: 0.84, flip: true, shade: "light" },
-  { x: 156, y: 468, r: -6, s: 0.78, flip: false, shade: "light" },
-  { x: 162, y: 462, r: 14, s: 0.72, flip: true, shade: "mid" },
+const FIG_LEAVES: Leaf[] = [
+  { x: 149, y: 600, r: -78, s: 0.82, shade: "dark" },
+  { x: 168, y: 588, r: 76, s: 0.86, shade: "dark" },
+  { x: 150, y: 560, r: -62, s: 0.98, shade: "mid" },
+  { x: 168, y: 548, r: 60, s: 1.0, shade: "mid" },
+  { x: 151, y: 520, r: -46, s: 1.0, shade: "light" },
+  { x: 168, y: 508, r: 46, s: 1.02, shade: "mid" },
+  { x: 152, y: 482, r: -30, s: 0.96, shade: "light" },
+  { x: 167, y: 470, r: 30, s: 0.94, shade: "mid" },
+  { x: 156, y: 448, r: -14, s: 0.86, shade: "light" },
+  { x: 164, y: 440, r: 14, s: 0.8, shade: "mid" },
+  { x: 160, y: 430, r: 0, s: 0.72, shade: "light" },
 ];
 
-const RIGHT_PLANT_BLADES = [
-  { dx: -28, h: 92, c1x: -18, c2x: -26, tipX: -34, w: 6.5, shade: "dark" },
-  { dx: -18, h: 138, c1x: -12, c2x: -22, tipX: -24, w: 8, shade: "mid" },
-  { dx: -10, h: 176, c1x: -8, c2x: -14, tipX: -12, w: 9, shade: "light" },
-  { dx: -2, h: 204, c1x: -2, c2x: 6, tipX: 4, w: 9.5, shade: "mid" },
-  { dx: 6, h: 188, c1x: 8, c2x: 16, tipX: 18, w: 8.5, shade: "light" },
-  { dx: 14, h: 154, c1x: 12, c2x: 24, tipX: 28, w: 8, shade: "mid" },
-  { dx: 22, h: 116, c1x: 16, c2x: 28, tipX: 36, w: 7, shade: "dark" },
-  { dx: -6, h: 128, c1x: 4, c2x: -8, tipX: -6, w: 7.5, shade: "dark" },
-  { dx: 10, h: 132, c1x: -4, c2x: 10, tipX: 12, w: 7.5, shade: "dark" },
+/** Snake-plant blade: wide, pointed, yellow-edged, with dark cross-banding. */
+function SnakeBlade({ dx, h, w, lean }: { dx: number; h: number; w: number; lean: number }) {
+  const bands = [0.16, 0.3, 0.44, 0.58, 0.72].map((u) => {
+    const y = -h * u;
+    const cx = lean * u * u;
+    const hw = w * (1 - u * 0.8) * 0.85;
+    return `M${(cx - hw).toFixed(1)} ${y.toFixed(1)}Q${cx.toFixed(1)} ${(y - 5).toFixed(1)} ${(cx + hw).toFixed(1)} ${y.toFixed(1)}`;
+  });
+  return (
+    <g transform={`translate(${1090 + dx} 654)`}>
+      <path
+        d={`M${-w} 0C${-w * 1.05} ${-h * 0.35} ${-w * 0.6 + lean * 0.5} ${-h * 0.72} ${lean} ${-h}C${w * 0.6 + lean * 0.5} ${-h * 0.72} ${w * 1.05} ${-h * 0.35} ${w} 0Z`}
+        fill="url(#botanical-mid)"
+        stroke="#C7D58A"
+        strokeOpacity=".5"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d={bands.join("")} stroke="#0C1F14" strokeOpacity=".38" strokeWidth="1.4" strokeLinecap="round" />
+      <path
+        d={`M0 -4C${lean * 0.1} ${-h * 0.35} ${lean * 0.4} ${-h * 0.72} ${lean} ${-h + 4}`}
+        stroke="#A7D3AE"
+        strokeOpacity=".22"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </g>
+  );
+}
+
+const SNAKE_BLADES = [
+  { dx: 5, h: 224, w: 15, lean: 3 },
+  { dx: -7, h: 196, w: 15, lean: -7 },
+  { dx: 17, h: 178, w: 14, lean: 12 },
+  { dx: -19, h: 150, w: 13, lean: -16 },
+  { dx: 28, h: 132, w: 12, lean: 20 },
+  { dx: -30, h: 104, w: 11, lean: -22 },
+  { dx: 36, h: 86, w: 10, lean: 26 },
 ];
 
 /* ───────────────────────── anatomically synced legs & arms ───────────────────────── */
@@ -285,33 +355,25 @@ function SeatedLeg({ side }: { side: "left" | "right" }) {
   const isRight = side === "right";
   return (
     <g transform={isRight ? "translate(1120 0) scale(-1 1)" : undefined}>
-      {/* Natural seated thigh & knee aligned with torso hips */}
-      <path
-        d="M474 548
-           H532
-           L530 596
-           C529 614 525 632 522 654
-           H484
-           C481 632 477 614 475 596
-           Z"
-        fill="url(#pants)"
-      />
-      {/* Subtle knee highlight & fabric crease */}
-      <path d="M504 558C506 584 506 618 504 650" stroke="#94A3B8" strokeOpacity=".08" strokeWidth="8" strokeLinecap="round" />
-      <path d="M480 594Q502 602 526 594" stroke="#020617" strokeOpacity=".45" strokeWidth="2" strokeLinecap="round" />
-      {/* Dark ankle sock */}
-      <rect x="486" y="648" width="34" height="10" fill="#090D16" />
-      {/* Realistic sleek sneaker */}
-      <path
-        d="M482 654
-           H524
-           C534 654 540 662 538 672
-           H472
-           C470 662 474 654 482 654Z"
-        fill="url(#shoe)"
-      />
-      <path d="M486 657H520" stroke="#64748B" strokeOpacity=".35" strokeWidth="2" strokeLinecap="round" />
-      <rect x="471" y="668" width="68" height="4.5" rx="2.2" fill="#CBD5E1" />
+      <ellipse cx="505" cy="673" rx="38" ry="4.5" fill="#000" fillOpacity=".6" />
+
+      {/* knee (tucked under the desk) and tapered shin */}
+      <path d="M481 564C481 556 491 552 505 552C519 552 529 556 529 564L526 598C525 620 524 638 523 652H487C486 638 485 620 484 598Z" fill="url(#pants)" />
+      <ellipse cx="505" cy="571" rx="14" ry="9" fill="#94A3B8" fillOpacity=".14" filter="url(#blur-small)" />
+      <path d="M500 592C501 612 501 630 500 646" stroke="#94A3B8" strokeOpacity=".09" strokeWidth="8" strokeLinecap="round" filter="url(#blur-small)" />
+      <path d="M489 579Q505 586 521 579" stroke="#020617" strokeOpacity=".4" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M492 613Q505 618 518 613" stroke="#020617" strokeOpacity=".28" strokeWidth="1.2" strokeLinecap="round" />
+
+      {/* hem bunching + sock */}
+      <path d="M487 642C494 647 499 643 505 648C511 643 517 647 523 642L524 654H486Z" fill="#0A101C" />
+      <rect x="490" y="650" width="30" height="5" fill="#0B1220" />
+
+      {/* sneaker */}
+      <path d="M483 652H523C531 652 538 657 539 665L540 668H471C470 660 474 653 483 652Z" fill="url(#shoe)" />
+      <path d="M514 660C523 658.5 534 661 539 667H516Z" fill="#fff" fillOpacity=".07" />
+      <path d="M492 656H512M490 660H514M488 664H516" stroke="#CBD5E1" strokeOpacity=".55" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M469 667H541C541 671 539 673.5 535 674H473C470 673.5 469 671 469 667Z" fill="#E2E8F0" />
+      <path d="M470 672.4H540" stroke="#0F172A" strokeOpacity=".4" strokeWidth="1.6" />
     </g>
   );
 }
@@ -320,79 +382,25 @@ function RealisticArm({ side, attentive }: { side: "left" | "right"; attentive: 
   const isRight = side === "right";
   return (
     <g transform={isRight ? "translate(1120 0) scale(-1 1)" : undefined}>
-      {/* Forearm & hand layered naturally so they reach inward toward the MacBook keyboard */}
       <g className={`typing-arm typing-arm--${side} ${attentive ? "is-resting" : ""}`}>
-        {/* Anatomically tapered bare forearm */}
-        <path
-          d="M432 464
-             C436 490 452 512 480 522
-             L492 504
-             C472 494 462 478 458 456
-             Z"
-          fill="url(#skin-arm)"
-        />
-        {/* Subtle forearm muscle/ulna shading */}
-        <path
-          d="M438 474C446 494 460 508 482 518"
-          stroke="#7D4B2F"
-          strokeOpacity=".35"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        {/* Properly wrapped wristwatch on left wrist (no longer sticking out) */}
+        {/* forearm resting on the desk, running in toward the keys behind the lid */}
+        <path d="M430 468C432 490 450 510 486 521L494 506C478 500 468 488 465 466Z" fill="url(#skin-arm)" />
+        <path d="M434 480C442 498 460 512 484 520" stroke="#6B3E24" strokeOpacity=".3" strokeWidth="2" strokeLinecap="round" />
+        <path d="M440 470C446 488 462 500 482 507" stroke="#E0A67C" strokeOpacity=".18" strokeWidth="3" strokeLinecap="round" />
+        {/* rolled sleeve cuff */}
+        <path d="M423 457L466 446L468 463L426 475Z" fill="#1B3263" stroke="#0E1B3C" strokeWidth="1" strokeLinejoin="round" />
+        <path d="M424 459L465 448" stroke="#8FB0F0" strokeOpacity=".3" strokeWidth="1.2" strokeLinecap="round" />
+        {/* wristwatch (left wrist) */}
         {!isRight && (
           <g>
-            {/* Strap wrapping across wrist */}
-            <path d="M459 506L475 491" stroke="#0F172A" strokeWidth="5.5" strokeLinecap="round" />
-            {/* Metallic watch case sitting flush on wrist */}
-            <ellipse
-              cx="467"
-              cy="498.5"
-              rx="5"
-              ry="3.6"
-              transform="rotate(-42 467 498.5)"
-              fill="#1E293B"
-              stroke="#94A3B8"
-              strokeWidth="1.2"
-            />
+            <path d="M450 506L466 488" stroke="#0F172A" strokeWidth="6" strokeLinecap="round" />
+            <circle cx="458" cy="497" r="5.2" fill="#1E293B" stroke="#94A3B8" strokeWidth="1.2" />
+            <circle cx="458" cy="497" r="2.6" fill="#38BDF8" fillOpacity=".5" />
           </g>
         )}
-        {/* Hand & fingers resting over the MacBook keyboard */}
-        <path
-          d="M476 508
-             C472 514 476 523 486 525
-             L512 524
-             C516 523 518 516 513 512
-             L488 502Z"
-          fill="url(#skin-arm)"
-        />
+        {/* hand tucked behind the lid */}
+        <path d="M476 508C472 514 476 523 486 525L512 524C516 523 518 516 513 512L488 502Z" fill="url(#skin-arm)" />
       </g>
-
-      {/* Tailored jacket shoulder & sleeve drawn over top of upper forearm for seamless joint */}
-      <path
-        d="M466 356
-           C444 366 430 392 424 430
-           C421 446 423 460 428 470
-           L462 460
-           C458 446 458 430 462 412
-           C466 394 474 374 484 362Z"
-        fill="url(#jacket)"
-      />
-      {/* Rolled-up sleeve cuff */}
-      <path
-        d="M425 460L462 450L465 463L428 473Z"
-        fill="#1E293B"
-        stroke="#090D16"
-        strokeWidth="1"
-      />
-      {/* Shoulder & sleeve rim highlight */}
-      <path
-        d="M464 358C444 370 432 396 426 432"
-        stroke="#94A3B8"
-        strokeOpacity=".25"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
     </g>
   );
 }
@@ -498,6 +506,18 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
             <stop stopColor="#FEF3C7" stopOpacity=".42" />
             <stop offset="1" stopColor="#FEF3C7" stopOpacity="0" />
           </radialGradient>
+          <linearGradient id="cone-down" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#FEF3C7" stopOpacity=".1" />
+            <stop offset="1" stopColor="#FEF3C7" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="streak-warm" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#FDE68A" stopOpacity=".5" />
+            <stop offset="1" stopColor="#FDE68A" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="streak-cool" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#BAE6FD" stopOpacity=".5" />
+            <stop offset="1" stopColor="#BAE6FD" stopOpacity="0" />
+          </linearGradient>
           <clipPath id="glass-clip">
             <rect x="-260" y="48" width="1640" height="512" />
           </clipPath>
@@ -548,6 +568,7 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
         <rect x="-300" y="0" width="1720" height="48" fill="url(#ceiling)" />
         {[-120, 160, 430, 700, 980, 1260].map((x) => (
           <g key={x}>
+            <path d={`M${x - 12} 34L${x - 95} 330L${x + 95} 330L${x + 12} 34Z`} fill="url(#cone-down)" />
             <ellipse cx={x} cy="40" rx="68" ry="14" fill="url(#downlight)" />
             <ellipse cx={x} cy="28" rx="13" ry="3" fill="#FEF3C7" />
           </g>
@@ -555,6 +576,9 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
 
         <rect x="-300" y="564" width="1720" height="156" fill="url(#floor)" />
         <rect x="-300" y="564" width="1720" height="70" fill="url(#floor-glow)" />
+        {FLOOR_STREAKS.map((s, i) => (
+          <rect key={i} x={s.x} y="564" width={s.w} height={s.h} fill={s.warm ? "url(#streak-warm)" : "url(#streak-cool)"} opacity={s.o} />
+        ))}
       </svg>
 
       {/* ═════════ LAYER 2 — Plants, Desk, Synced Developer, Phone on Stand & Real MacBook ═════════ */}
@@ -582,9 +606,10 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
             <stop offset="1" stopColor="#1F3D2B" />
           </linearGradient>
           <linearGradient id="ceramic-pot" x1="0" y1="0" x2="1" y2="0">
-            <stop stopColor="#334155" />
-            <stop offset=".45" stopColor="#1E293B" />
-            <stop offset="1" stopColor="#090D16" />
+            <stop stopColor="#1A2233" />
+            <stop offset=".22" stopColor="#4A5873" />
+            <stop offset=".5" stopColor="#2A3550" />
+            <stop offset="1" stopColor="#080B14" />
           </linearGradient>
           <linearGradient id="walnut-top" x1="0" y1="0" x2="1" y2="1">
             <stop stopColor="#8C6240" />
@@ -597,9 +622,15 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
           </linearGradient>
           {/* Authentic Anodized Space-Gray MacBook Pro Aluminum Gradient */}
           <linearGradient id="mac-lid" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#64748B" />
-            <stop offset=".45" stopColor="#475569" />
-            <stop offset="1" stopColor="#1E293B" />
+            <stop stopColor="#8893A5" />
+            <stop offset=".35" stopColor="#626D80" />
+            <stop offset=".7" stopColor="#465061" />
+            <stop offset="1" stopColor="#2E3645" />
+          </linearGradient>
+          <linearGradient id="lid-sheen" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#fff" stopOpacity=".16" />
+            <stop offset=".45" stopColor="#fff" stopOpacity="0" />
+            <stop offset="1" stopColor="#000" stopOpacity=".18" />
           </linearGradient>
           <linearGradient id="alu-stand" x1="0" y1="0" x2="1" y2="1">
             <stop stopColor="#CBD5E1" />
@@ -607,62 +638,81 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
             <stop offset="1" stopColor="#334155" />
           </linearGradient>
           <linearGradient id="jacket" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#273549" />
-            <stop offset=".5" stopColor="#1E293B" />
-            <stop offset="1" stopColor="#0F172A" />
+            <stop stopColor={JACKET[0]} />
+            <stop offset=".5" stopColor={JACKET[1]} />
+            <stop offset="1" stopColor={JACKET[2]} />
           </linearGradient>
           <linearGradient id="inner-shirt" x1="0" y1="0" x2="0" y2="1">
-            <stop stopColor="#E2E8F0" />
-            <stop offset="1" stopColor="#94A3B8" />
+            <stop stopColor="#F8FAFC" />
+            <stop offset="1" stopColor="#CBD5E1" />
           </linearGradient>
           {/* Smooth, natural human skin shading */}
           <radialGradient id="skin-face" cx=".48" cy=".36" r=".68">
-            <stop stopColor="#E4AE8C" />
-            <stop offset=".55" stopColor="#CC906C" />
-            <stop offset=".85" stopColor="#AD7250" />
-            <stop offset="1" stopColor="#8A5436" />
+            <stop stopColor="#D49A70" />
+            <stop offset=".55" stopColor="#BC7F55" />
+            <stop offset=".85" stopColor="#9B6240" />
+            <stop offset="1" stopColor="#744427" />
           </radialGradient>
           <linearGradient id="skin-arm" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#DDA482" />
-            <stop offset="1" stopColor="#A66B49" />
+            <stop stopColor="#CC9068" />
+            <stop offset="1" stopColor="#94603E" />
           </linearGradient>
           <linearGradient id="neck-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop stopColor="#8A5436" />
-            <stop offset=".35" stopColor="#AD7250" />
-            <stop offset="1" stopColor="#C88C68" />
+            <stop stopColor="#744427" />
+            <stop offset=".3" stopColor="#96603B" />
+            <stop offset="1" stopColor="#B8805A" />
           </linearGradient>
+          <linearGradient id="shirt-shade" x1="0" y1="0" x2="1" y2="0">
+            <stop stopColor="#000" stopOpacity=".34" />
+            <stop offset=".18" stopColor="#000" stopOpacity="0" />
+            <stop offset=".82" stopColor="#000" stopOpacity="0" />
+            <stop offset="1" stopColor="#000" stopOpacity=".34" />
+          </linearGradient>
+          <linearGradient id="beard-fade" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#15110F" stopOpacity=".08" />
+            <stop offset=".32" stopColor="#15110F" stopOpacity=".82" />
+            <stop offset="1" stopColor="#15110F" stopOpacity=".97" />
+          </linearGradient>
+          <filter id="blur-fine" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation=".7" />
+          </filter>
+          <filter id="blur-cone" x="-40%" y="-20%" width="180%" height="140%">
+            <feGaussianBlur stdDeviation="9" />
+          </filter>
           <linearGradient id="hair-real" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#262930" />
-            <stop offset=".5" stopColor="#14171D" />
-            <stop offset="1" stopColor="#080A0E" />
+            <stop stopColor="#1C1D23" />
+            <stop offset=".5" stopColor="#101116" />
+            <stop offset="1" stopColor="#050608" />
           </linearGradient>
           <radialGradient id="iris-real" cx=".4" cy=".35" r=".75">
-            <stop stopColor="#6E4427" />
-            <stop offset=".6" stopColor="#3D2312" />
-            <stop offset="1" stopColor="#1A0E06" />
+            <stop stopColor="#4F2E17" />
+            <stop offset=".6" stopColor="#2A170B" />
+            <stop offset="1" stopColor="#100803" />
           </radialGradient>
           <radialGradient id="screen-spill">
             <stop stopColor="#60A5FA" stopOpacity=".75" />
             <stop offset="1" stopColor="#60A5FA" stopOpacity="0" />
           </radialGradient>
           <radialGradient id="warm-glow">
-            <stop stopColor="#FDE68A" stopOpacity=".3" />
+            <stop stopColor="#FDE68A" stopOpacity=".4" />
             <stop offset="1" stopColor="#FDE68A" stopOpacity="0" />
           </radialGradient>
           <linearGradient id="pants" x1="0" y1="0" x2="1" y2="0">
-            <stop stopColor="#1E293B" />
-            <stop offset=".5" stopColor="#151E2E" />
-            <stop offset="1" stopColor="#090D16" />
+            <stop stopColor="#2A3750" />
+            <stop offset=".35" stopColor="#1C2639" />
+            <stop offset=".75" stopColor="#121A2A" />
+            <stop offset="1" stopColor="#0A0F1A" />
           </linearGradient>
           <linearGradient id="shoe" x1="0" y1="0" x2="0" y2="1">
-            <stop stopColor="#334155" />
-            <stop offset="1" stopColor="#0F172A" />
+            <stop stopColor="#46536A" />
+            <stop offset=".5" stopColor="#222C3F" />
+            <stop offset="1" stopColor="#0B1220" />
           </linearGradient>
           <clipPath id="eye-l">
-            <path d="M528 256 C532 250.5 543 250.5 547 256 C543 260.5 532 260.5 528 256Z" />
+            <path d="M527 256 C531.5 249.5 543.5 249.5 548 256 C543.5 261.5 531.5 261.5 527 256Z" />
           </clipPath>
           <clipPath id="eye-r">
-            <path d="M573 256 C577 250.5 588 250.5 592 256 C588 260.5 577 260.5 573 256Z" />
+            <path d="M572 256 C576.5 249.5 588.5 249.5 593 256 C588.5 261.5 576.5 261.5 572 256Z" />
           </clipPath>
           <filter id="blur-soft" x="-30%" y="-100%" width="160%" height="300%">
             <feGaussianBlur stdDeviation="14" />
@@ -681,57 +731,104 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
             <rect x="-25" y="-25" width="50" height="50" fill="#fff" />
             <circle cx="11.5" cy="-2" r="4.5" fill="#000" />
           </mask>
+        <filter id="blur-small" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
+          {/* brushed-aluminium grain for the MacBook lid */}
+          <filter id="brushed" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.85" numOctaves="2" seed="4" />
+            <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.4 0 0 0 -0.5" />
+          </filter>
+          <clipPath id="lid-clip">
+            <rect x="468" y="406" width="184" height="122" rx="9" />
+          </clipPath>
+          <clipPath id="desk-top-clip">
+            <path d="M276 506H844L890 541H230Z" />
+          </clipPath>
+          <linearGradient id="desk-leg" x1="0" y1="0" x2="1" y2="0">
+            <stop stopColor="#94A3B8" />
+            <stop offset=".25" stopColor="#475569" />
+            <stop offset="1" stopColor="#0F172A" />
+          </linearGradient>
+          <linearGradient id="desk-apron" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#4A2F1B" />
+            <stop offset="1" stopColor="#140C06" />
+          </linearGradient>
+          <linearGradient id="under-shadow" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#000" stopOpacity=".6" />
+            <stop offset="1" stopColor="#000" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="lamp-shade" x1="0" y1="0" x2="1" y2="0">
+            <stop stopColor="#BFAE86" />
+            <stop offset=".5" stopColor="#F3E9CB" />
+            <stop offset="1" stopColor="#B7A57C" />
+          </linearGradient>
+          <linearGradient id="lamp-cone" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#FDE68A" stopOpacity=".26" />
+            <stop offset="1" stopColor="#FDE68A" stopOpacity="0" />
+          </linearGradient>
+          <radialGradient id="soil" cx=".5" cy=".4" r=".7">
+            <stop stopColor="#2B1D14" />
+            <stop offset="1" stopColor="#0E0907" />
+          </radialGradient>
+          {/* fine beard stubble texture */}
+          <pattern id="stubble" width="3.2" height="3.2" patternUnits="userSpaceOnUse">
+            <circle cx=".7" cy=".8" r=".45" fill="#000" fillOpacity=".55" />
+            <circle cx="2.3" cy="2.2" r=".4" fill="#000" fillOpacity=".45" />
+          </pattern>
         </defs>
 
-        {/* ───── Left Botanical Plant ───── */}
+        {/* ───── Left fiddle-leaf fig tree in a ceramic pot ───── */}
         <ellipse cx="158" cy="708" rx="62" ry="9" fill="#000" fillOpacity=".55" filter="url(#blur-soft)" />
         <g>
-          <path
-            d="M158 642 C154 600 144 562 138 504
-               M158 642 C160 590 162 532 158 464
-               M158 642 C164 604 176 568 178 524"
-            stroke="#4A3525"
-            strokeWidth="4.5"
-            strokeLinecap="round"
-          />
-          {LEFT_PLANT_LEAVES.map((l, i) => (
-            <OrganicLeaf key={i} {...l} />
+          {/* woody trunk with a light edge */}
+          <path d="M158 640C154 600 164 560 158 520C153 490 162 460 160 426" stroke="#3E2C1E" strokeWidth="6" strokeLinecap="round" />
+          <path d="M160 640C156 600 166 560 160 520C155 490 164 460 162 426" stroke="#8A6A4A" strokeOpacity=".4" strokeWidth="1.6" strokeLinecap="round" />
+          {/* short petioles joining each leaf to the trunk */}
+          {FIG_LEAVES.map((l, i) => (
+            <path key={`p${i}`} d={`M159 ${l.y + 3}L${l.x} ${l.y}`} stroke="#2F4A2E" strokeWidth="2" strokeLinecap="round" />
           ))}
-          <path d="M122 636H194L186 708H130Z" fill="url(#ceramic-pot)" />
-          <ellipse cx="158" cy="636" rx="36" ry="6" fill="#0F172A" />
-          <ellipse cx="158" cy="636" rx="32" ry="4" fill="#1C1613" />
+          {FIG_LEAVES.map((l, i) => (
+            <FigLeaf key={i} {...l} />
+          ))}
+          {/* pot body, rim, soil, pebbles, highlight */}
+          <path d="M122 640H194L186 708H130Z" fill="url(#ceramic-pot)" />
+          <path d="M118 632H198L196 644H120Z" fill="url(#ceramic-pot)" />
+          <path d="M118 632H198" stroke="#94A3B8" strokeOpacity=".35" strokeWidth="1" />
+          <ellipse cx="158" cy="633" rx="39" ry="5.5" fill="url(#soil)" />
+          <circle cx="146" cy="632" r="1.6" fill="#475569" />
+          <circle cx="170" cy="634" r="1.3" fill="#64748B" />
+          <path d="M134 652L140 702" stroke="#fff" strokeOpacity=".07" strokeWidth="6" strokeLinecap="round" />
         </g>
 
-        {/* ───── Right Floor Lamp + Dracaena Plant ───── */}
-        <ellipse cx="962" cy="352" rx="130" ry="92" fill="url(#warm-glow)" />
+        {/* ───── Floor lamp (glowing shade, soft light cone) + snake plant ───── */}
+        <ellipse cx="962" cy="340" rx="190" ry="130" fill="url(#warm-glow)" />
+        <ellipse cx="962" cy="268" rx="46" ry="18" fill="#FDE68A" fillOpacity=".14" filter="url(#blur-small)" />
+        <path d="M936 340H988L1100 668H826Z" fill="url(#lamp-cone)" filter="url(#blur-cone)" />
+        <ellipse cx="962" cy="668" rx="130" ry="12" fill="#FDE68A" fillOpacity=".09" filter="url(#blur-small)" />
         <rect x="959" y="332" width="5" height="332" fill="#334155" />
         <rect x="959" y="332" width="1.5" height="332" fill="#94A3B8" fillOpacity=".35" />
         <ellipse cx="962" cy="666" rx="32" ry="7" fill="#1E293B" />
-        <path d="M928 334H996L985 284H939Z" fill="#E2D5B5" />
-        <ellipse cx="962" cy="334" rx="34" ry="4.5" fill="#FEF3C7" />
+        <ellipse cx="962" cy="664" rx="32" ry="4" fill="#475569" fillOpacity=".5" />
+        <path d="M928 334H996L985 284H939Z" fill="url(#lamp-shade)" />
+        <path d="M939 284H985" stroke="#fff" strokeOpacity=".35" strokeWidth="1.2" />
+        <ellipse cx="962" cy="334" rx="34" ry="5" fill="#FFF3C4" />
+        <ellipse cx="962" cy="335" rx="22" ry="2.8" fill="#fff" fillOpacity=".95" />
 
         <ellipse cx="1090" cy="708" rx="48" ry="8" fill="#000" fillOpacity=".55" filter="url(#blur-soft)" />
         <g>
-          {RIGHT_PLANT_BLADES.map((b, i) => {
-            const fillId =
-              b.shade === "dark" ? "url(#botanical-dark)" : b.shade === "mid" ? "url(#botanical-mid)" : "url(#botanical-light)";
-            return (
-              <g key={i} transform={`translate(${1090 + b.dx} 654)`}>
-                <path
-                  d={`M${-b.w} 0
-                      C${-b.w * 0.9 + b.c1x} ${-b.h * 0.35} ${-b.w * 0.4 + b.c2x} ${-b.h * 0.72} ${b.tipX} ${-b.h}
-                      C${b.w * 0.4 + b.c2x} ${-b.h * 0.72} ${b.w * 0.9 + b.c1x} ${-b.h * 0.35} ${b.w} 0Z`}
-                  fill={fillId}
-                  stroke="#6E9975"
-                  strokeOpacity=".4"
-                  strokeWidth="1"
-                />
-              </g>
-            );
-          })}
-          <path d="M1058 648H1122L1114 708H1066Z" fill="url(#ceramic-pot)" />
-          <ellipse cx="1090" cy="648" rx="32" ry="5.5" fill="#0F172A" />
-          <ellipse cx="1090" cy="648" rx="28" ry="3.8" fill="#1C1613" />
+          {SNAKE_BLADES.map((b, i) => (
+            <SnakeBlade key={i} {...b} />
+          ))}
+          <path d="M1060 652H1120L1113 708H1067Z" fill="url(#ceramic-pot)" />
+          <path d="M1055 644H1125L1123 656H1057Z" fill="url(#ceramic-pot)" />
+          <path d="M1055 644H1125" stroke="#94A3B8" strokeOpacity=".35" strokeWidth="1" />
+          <ellipse cx="1090" cy="645" rx="33" ry="5" fill="url(#soil)" />
+          <circle cx="1080" cy="645" r="1.4" fill="#475569" />
+          <circle cx="1100" cy="646" r="1.2" fill="#64748B" />
+          <path d="M1070 662L1074 702" stroke="#fff" strokeOpacity=".07" strokeWidth="5" strokeLinecap="round" />
+          {/* warm lamp light catching the pot */}
+          <path d="M1110 652L1106 702" stroke="#FDE68A" strokeOpacity=".12" strokeWidth="4" strokeLinecap="round" />
         </g>
 
         {/* ───── Ergonomic Executive Chair ───── */}
@@ -739,6 +836,7 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
           <rect x="522" y="218" width="76" height="40" rx="12" fill="#0F172A" stroke="#334155" strokeWidth="1.5" />
           <rect x="484" y="284" width="152" height="252" rx="28" fill="#0B111E" stroke="#334155" strokeWidth="2" />
           <rect x="494" y="296" width="132" height="226" rx="22" fill="#151F32" />
+          <path d="M502 320H618M502 344H618M502 368H618M502 392H618M502 416H618M502 440H618M502 464H618M502 488H618" stroke="#334155" strokeOpacity=".28" strokeWidth="1" />
           <path d="M560 562V604M560 604L486 650M560 604L634 650" stroke="#0F172A" strokeWidth="9" strokeLinecap="round" />
           <circle cx="486" cy="654" r="5.5" fill="#020617" />
           <circle cx="634" cy="654" r="5.5" fill="#020617" />
@@ -751,20 +849,13 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
         {/* ───── Realistic, Synced Developer Character ───── */}
         <motion.g style={{ y: torsoY }}>
           <g className="breathe">
-            {/* LAYER A: Neck Base (Drawn FIRST so the shirt & jacket collar sit naturally ON TOP of the neck) */}
+            {/* LAYER A: neck and open-collar chest drawn as one continuous shape */}
             <path
-              d="M534 298
-                 C535 322 532 342 522 362
-                 H598
-                 C588 342 585 322 586 298Z"
+              d="M535 296C536 320 534 334 528 342L560 374L592 342C586 334 584 320 585 296Z"
               fill="url(#neck-grad)"
             />
-            {/* Natural shadow cast by the jaw onto the upper neck */}
-            <path
-              d="M535 300C546 318 574 318 585 300V326C573 338 547 338 535 326Z"
-              fill="#000"
-              fillOpacity=".24"
-            />
+            {/* shadow the jaw throws on the neck */}
+            <path d="M535 300C546 320 574 320 585 300V328C573 340 547 340 535 328Z" fill="#000" fillOpacity=".28" />
 
             {/* LAYER B: Head Unit (Pivots smoothly from the neck without any harsh cut line) */}
             <motion.g
@@ -786,15 +877,15 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
 
               {/* Natural Human Head & Jawline */}
               <path
-                d="M515 232
-                   C515 202 533 186 560 186
-                   C587 186 605 202 605 232
-                   C605 248 603 264 598 278
-                   C593 292 583 303 571 310
-                   C565 313.5 562 315 560 315
-                   C558 315 555 313.5 549 310
-                   C537 303 527 292 522 278
-                   C517 264 515 248 515 232Z"
+                d="M513 232
+                   C513 202 532 186 560 186
+                   C588 186 607 202 607 232
+                   C607 250 605 266 600 280
+                   C595 294 585 305 572 312
+                   C566 315.5 563 317 560 317
+                   C557 317 554 315.5 548 312
+                   C535 305 525 294 520 280
+                   C515 266 513 250 513 232Z"
                 fill="url(#skin-face)"
               />
 
@@ -821,6 +912,45 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
                 fillOpacity=".15"
               />
 
+              {/* Full short beard — follows the jaw, joins the sideburns, goatee under the lip */}
+              <g>
+                <path
+                  d="M515.5 258
+                     C517 276 521 290 530 301
+                     C537 308 543 311 548 313
+                     C553 316.5 557 318.5 560 318.5
+                     C563 318.5 567 316.5 572 313
+                     C577 311 583 308 590 301
+                     C599 290 603 276 604.5 258
+                     C603 272 598 283 591 290
+                     C586 295 582 299 575 302
+                     C570 304.5 565 306 560 306
+                     C555 306 550 304.5 545 302
+                     C538 299 534 295 529 290
+                     C522 283 517 272 515.5 258Z"
+                  fill="url(#beard-fade)" filter="url(#blur-fine)"
+                />
+                <path
+                  d="M515.5 258
+                     C517 276 521 290 530 301
+                     C537 308 543 311 548 313
+                     C553 316.5 557 318.5 560 318.5
+                     C563 318.5 567 316.5 572 313
+                     C577 311 583 308 590 301
+                     C599 290 603 276 604.5 258
+                     C603 272 598 283 591 290
+                     C586 295 582 299 575 302
+                     C570 304.5 565 306 560 306
+                     C555 306 550 304.5 545 302
+                     C538 299 534 295 529 290
+                     C522 283 517 272 515.5 258Z"
+                  fill="url(#stubble)"
+                  fillOpacity=".5"
+                />
+                {/* soft light on the beard from the laptop */}
+                <path d="M538 308C549 314 571 314 582 308" stroke="#60A5FA" strokeOpacity=".16" strokeWidth="2" strokeLinecap="round" />
+              </g>
+
               {/* Screen backlight glow on chin & cheeks */}
               <motion.ellipse
                 cx="560"
@@ -838,21 +968,21 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
 
                 {/* Eyes */}
                 <g className="eye-blink">
-                  <path d="M528 256 C532 250.5 543 250.5 547 256 C543 260.5 532 260.5 528 256Z" fill="#F8FAFC" />
-                  <path d="M573 256 C577 250.5 588 250.5 592 256 C588 260.5 577 260.5 573 256Z" fill="#F8FAFC" />
+                  <path d="M527 256 C531.5 249.5 543.5 249.5 548 256 C543.5 261.5 531.5 261.5 527 256Z" fill="#F8FAFC" />
+                  <path d="M572 256 C576.5 249.5 588.5 249.5 593 256 C588.5 261.5 576.5 261.5 572 256Z" fill="#F8FAFC" />
 
                   <g clipPath="url(#eye-l)">
                     <motion.g style={{ x: pupilX, y: pupilY }}>
-                      <circle cx="537.5" cy="255.5" r="4.2" fill="url(#iris-real)" />
-                      <circle cx="537.5" cy="255.5" r="1.9" fill="#090D16" />
+                      <circle cx="537.5" cy="255.5" r="4.7" fill="url(#iris-real)" />
+                      <circle cx="537.5" cy="255.5" r="2.2" fill="#090D16" />
                       <circle cx="536.2" cy="254.2" r="1.0" fill="#fff" fillOpacity=".95" />
                     </motion.g>
                   </g>
 
                   <g clipPath="url(#eye-r)">
                     <motion.g style={{ x: pupilX, y: pupilY }}>
-                      <circle cx="582.5" cy="255.5" r="4.2" fill="url(#iris-real)" />
-                      <circle cx="582.5" cy="255.5" r="1.9" fill="#090D16" />
+                      <circle cx="582.5" cy="255.5" r="4.7" fill="url(#iris-real)" />
+                      <circle cx="582.5" cy="255.5" r="2.2" fill="#090D16" />
                       <circle cx="581.2" cy="254.2" r="1.0" fill="#fff" fillOpacity=".95" />
                     </motion.g>
                   </g>
@@ -874,7 +1004,8 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
                   />
                 </g>
 
-                {/* Sleek Half-Rim Developer Glasses */}
+                {/* Sleek Half-Rim Developer Glasses (off by default — see WEARS_GLASSES) */}
+                {WEARS_GLASSES && (
                 <g>
                   <rect
                     x="522"
@@ -908,14 +1039,15 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
                   <path d="M553 251 Q560 249 567 251 M522 250 L514 249 M598 250 L606 249" stroke="#475569" strokeWidth="1.3" strokeLinecap="round" />
                   <path d="M526 250L532 248M571 250L577 248" stroke="#fff" strokeOpacity=".38" strokeWidth="1.3" strokeLinecap="round" />
                 </g>
+                )}
 
                 {/* Eyebrows */}
                 <motion.g initial={false} animate={{ y: attentive ? -2.2 : 0 }} transition={{ duration: 0.28 }}>
                   <path
-                    d="M525 242 C531 238.5 541 238.5 548 241.5
-                       M595 242 C589 238.5 579 238.5 572 241.5"
-                    stroke="#181B20"
-                    strokeWidth="2.6"
+                    d="M523 243.5 C530 239 542 238.6 549 242.4
+                       M597 243.5 C590 239 578 238.6 571 242.4"
+                    stroke="#0E0D0D"
+                    strokeWidth="3.6"
                     strokeLinecap="round"
                   />
                 </motion.g>
@@ -924,9 +1056,9 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
                 <g>
                   <path d="M557 253 C556 263 556 271 555 277" stroke="#7D4B2F" strokeOpacity=".26" strokeWidth="1.6" strokeLinecap="round" />
                   <path d="M562 256 C564 266 565 274 563 280 C561 282 558 282 556 280" fill="#8C5233" fillOpacity=".18" />
-                  <ellipse cx="559.5" cy="278.5" rx="2.8" ry="1.8" fill="#F3C6A8" fillOpacity=".28" />
-                  <ellipse cx="556.5" cy="281" rx="1.5" ry="0.9" fill="#4A2515" fillOpacity=".55" />
-                  <ellipse cx="563" cy="281" rx="1.5" ry="0.9" fill="#4A2515" fillOpacity=".55" />
+                  <ellipse cx="560" cy="278.5" rx="3.8" ry="2.1" fill="#E0AC85" fillOpacity=".3" />
+                  <ellipse cx="555.2" cy="281" rx="1.9" ry="1" fill="#3A1C0F" fillOpacity=".6" />
+                  <ellipse cx="564.8" cy="281" rx="1.9" ry="1" fill="#3A1C0F" fillOpacity=".6" />
                 </g>
 
                 {/* Natural Lips */}
@@ -935,13 +1067,13 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
                     initial={false}
                     animate={{ d: attentive ? UPPER_LIP_PATH.attentive : UPPER_LIP_PATH.focused }}
                     transition={{ duration: 0.3 }}
-                    fill="#A3604E"
+                    fill="#8E5444"
                   />
                   <motion.path
                     initial={false}
                     animate={{ d: attentive ? LOWER_LIP_PATH.attentive : LOWER_LIP_PATH.focused }}
                     transition={{ duration: 0.3 }}
-                    fill="#BC7460"
+                    fill="#A5664F"
                   />
                   <motion.path
                     initial={false}
@@ -953,107 +1085,121 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
                     fill="none"
                   />
                 </g>
+              {/* Mustache joined to the beard around the mouth (inside the face group so it moves with the lips) */}
+                <path
+                  d="M545 288.5 C549 284 555 284.2 560 286.2 C565 284.2 571 284 575 288.5
+                     C572 291.5 566 292.4 560 291.4 C554 292.4 548 291.5 545 288.5Z"
+                  fill="#17120F"
+                  fillOpacity=".96"
+                />
+                <path
+                  d="M545 288.5 C541 292 540 298 545 302 L548 301 C546 297 546 293 548 290Z
+                     M575 288.5 C579 292 580 298 575 302 L572 301 C574 297 574 293 572 290Z"
+                  fill="#17120F"
+                  fillOpacity=".96"
+                />
+                <path d="M552 303C556 306 564 306 568 303C566 309 554 309 552 303Z" fill="#17120F" fillOpacity=".96" />
               </motion.g>
 
-              {/* Modern Side-Parted Tapered Haircut */}
+              {/* Voluminous curly hair, built from overlapping curls */}
               <g>
+                {/* dark base mass + curly hairline */}
                 <path
-                  d="M514 248
-                     C507 212 515 182 537 171
-                     C552 164 575 164 590 174
-                     C607 185 613 212 606 248
-                     C604 232 601 218 594 208
-                     C584 202 570 198 554 200
-                     C538 202 525 210 519 225
-                     C516 232 515 240 514 248Z"
-                  fill="url(#hair-real)"
+                  d="M510 252 C500 226 500 196 516 176 C530 160 548 156 560 156
+                     C574 156 592 160 606 176 C620 196 620 226 610 252
+                     C608 238 604 226 597 217 C588 210 574 207 560 207
+                     C546 207 532 210 523 217 C516 226 512 238 510 252Z"
+                  fill="#0A0B0E"
                 />
-                <path d="M514 236L516 258L519 258L518 234ZM606 236L604 258L601 258L602 234Z" fill="#14171D" />
-                <path
-                  d="M528 184C548 176 572 176 590 186
-                     M522 195C548 185 578 185 598 197"
-                  stroke="#64748B"
-                  strokeOpacity=".18"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                />
+                {HAIR_CURLS.map((c, i) => (
+                  <circle key={`c${i}`} cx={c.x} cy={c.y} r={c.r} fill={c.tone > 0.5 ? "url(#hair-real)" : "#0D0E12"} />
+                ))}
+                {/* tiny specular highlights so every curl reads as a curl */}
+                {HAIR_CURLS.map((c, i) => (
+                  <path
+                    key={`h${i}`}
+                    d={`M${(c.x - c.r * 0.6).toFixed(1)} ${(c.y - c.r * 0.15).toFixed(1)}A${(c.r * 0.6).toFixed(1)} ${(c.r * 0.6).toFixed(1)} 0 0 1 ${(c.x + c.r * 0.1).toFixed(1)} ${(c.y - c.r * 0.65).toFixed(1)}`}
+                    stroke="#94A3B8" strokeOpacity=".11" strokeWidth="1" strokeLinecap="round"
+                  />
+                ))}
+                {/* sideburns that run into the beard */}
+                <path d="M511 238L514 262L519 262L518 236ZM609 238L606 262L601 262L602 236Z" fill="#0D0E12" />
               </g>
             </motion.g>
 
-            {/* LAYER C: Torso, Inner Tee & Jacket Collar drawn OVER the lower neck so the neck sits cleanly inside the shirt */}
+            {/* LAYER C: navy button-up — shoulders, upper arms and torso in one piece */}
+            <path d="M530 338C508 341 484 347 462 358C440 370 427 394 423 428C420 446 421 460 425 474L466 464C461 450 461 434 464 420C462 456 460 500 458 534H662C660 500 658 456 656 420C659 434 659 450 654 464L695 474C699 460 700 446 697 428C693 394 680 370 658 358C636 347 612 341 590 338L560 372Z" fill="url(#jacket)" />
+            <path d="M530 338C508 341 484 347 462 358C440 370 427 394 423 428C420 446 421 460 425 474L466 464C461 450 461 434 464 420C462 456 460 500 458 534H662C660 500 658 456 656 420C659 434 659 450 654 464L695 474C699 460 700 446 697 428C693 394 680 370 658 358C636 347 612 341 590 338L560 372Z" fill="url(#shirt-shade)" />
+            {/* trapezius / shoulder highlight and armpit shadows */}
+            <path d="M486 350C466 358 446 372 436 396" stroke="#fff" strokeOpacity=".1" strokeWidth="5" strokeLinecap="round" />
+            <path d="M634 350C654 358 674 372 684 396" stroke="#fff" strokeOpacity=".1" strokeWidth="5" strokeLinecap="round" />
+            <path d="M464 420C474 432 478 446 478 470M656 420C646 432 642 446 642 470" stroke="#050A18" strokeOpacity=".4" strokeWidth="3" strokeLinecap="round" />
+            <path d="M440 400C436 420 436 440 440 460M680 400C684 420 684 440 680 460" stroke="#050A18" strokeOpacity=".22" strokeWidth="2" strokeLinecap="round" />
+            {/* chest folds */}
+            <path d="M500 400C508 430 510 470 506 528M620 400C612 430 610 470 614 528" stroke="#050A18" strokeOpacity=".22" strokeWidth="2" strokeLinecap="round" />
+            {/* button placket + buttons */}
+            <path d="M560 372V534" stroke="#0B1530" strokeOpacity=".7" strokeWidth="9" />
+            <path d="M555.5 372V534M564.5 372V534" stroke="#6B8BC9" strokeOpacity=".22" strokeWidth="1" />
+            {[392, 424, 456, 488, 516].map((y) => (
+              <g key={y}>
+                <circle cx="560" cy={y} r="2.6" fill="#C7D2E8" />
+                <circle cx="560" cy={y} r="1" fill="#0B1530" fillOpacity=".5" />
+              </g>
+            ))}
+            {/* chest pocket */}
             <path
-              d="M524 342
-                 C496 346 472 354 462 374
-                 C452 394 452 452 456 534
-                 H664
-                 C668 452 668 394 658 374
-                 C648 354 624 346 596 342
-                 C586 358 574 366 560 366
-                 C546 366 534 358 524 342Z"
-              fill="url(#jacket)"
+              d="M596 420H628V452C628 455 626 456 623 456H601C598 456 596 455 596 452Z"
+              fill="#fff"
+              fillOpacity=".03"
+              stroke="#0B1530"
+              strokeOpacity=".7"
+              strokeWidth="1.4"
             />
-            {/* Inner crew-neck tee wrapping smoothly around the base of the neck */}
-            <path
-              d="M526 343
-                 C535 358 547 365 560 365
-                 C573 365 585 358 594 343
-                 L586 376
-                 H534
-                 Z"
-              fill="url(#inner-shirt)"
-            />
-            {/* Ribbed collar band of inner tee */}
-            <path
-              d="M527 343C536 357 548 364 560 364C572 364 584 357 593 343"
-              stroke="#F8FAFC"
-              strokeOpacity=".65"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            {/* Structured jacket collar & lapels framing the neck */}
-            <path
-              d="M525 340L510 360L538 416L553 366Z
-                 M595 340L610 360L582 416L567 366Z"
-              fill="#1E293B"
-              stroke="#475569"
-              strokeOpacity=".4"
-              strokeWidth="1"
-            />
-            <path
-              d="M463 372C474 354 498 346 524 342
-                 M657 372C646 354 622 346 596 342"
-              stroke="#94A3B8"
-              strokeOpacity=".3"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <path d="M560 366V528" stroke="#090D16" strokeOpacity=".55" strokeWidth="2" />
-            <path
-              d="M494 410C500 450 498 492 492 528
-                 M626 410C620 450 622 492 628 528"
-              stroke="#090D16"
-              strokeOpacity=".4"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
+            <path d="M596 424H628" stroke="#6B8BC9" strokeOpacity=".25" strokeWidth="1" />
+            {/* collar: back stand + two flaps */}
+            <path d="M526 336C540 344 548 352 560 356C572 352 580 344 594 336L594 342C580 350 570 358 560 362C550 358 540 350 526 342Z" fill="#1E3869" />
+            <path d="M524 335L558 372L543 392L514 360Z" fill="#2B4B8C" stroke="#0E1B3C" strokeWidth="1" strokeLinejoin="round" />
+            <path d="M596 335L562 372L577 392L606 360Z" fill="#2B4B8C" stroke="#0E1B3C" strokeWidth="1" strokeLinejoin="round" />
+            <path d="M525 337L516 359M595 337L604 359" stroke="#8FB0F0" strokeOpacity=".3" strokeWidth="1.2" strokeLinecap="round" />
           </g>
 
-          {/* LAYER D: Synced Arms & Hands */}
-          <RealisticArm side="left" attentive={attentive} />
-          <RealisticArm side="right" attentive={attentive} />
+          
         </motion.g>
 
         {/* ───── Executive Walnut Desk ───── */}
         <ellipse cx="560" cy="684" rx="340" ry="20" fill="#000" fillOpacity=".55" filter="url(#blur-soft)" />
         <g>
-          <path d="M272 553H286L283 670H274Z" fill="#334155" />
-          <path d="M274 553H276.5L275.5 670H274Z" fill="#94A3B8" fillOpacity=".3" />
-          <path d="M834 553H848L846 670H837Z" fill="#334155" />
-          <path d="M836 553H838.5L837.5 670H836Z" fill="#94A3B8" fillOpacity=".3" />
-          <rect x="250" y="553" width="620" height="10" fill="#0F172A" />
-          <path d="M262 524H858L890 541H230Z" fill="url(#walnut-top)" />
+          {/* brushed-steel legs with adjustable feet */}
+          <path d="M270 563H290L288 666H272Z" fill="url(#desk-leg)" />
+          <path d="M272 563H274.5L274 666H272Z" fill="#E2E8F0" fillOpacity=".35" />
+          <rect x="264" y="664" width="30" height="7" rx="3" fill="#0B111E" />
+          <rect x="264" y="664" width="30" height="1.6" rx=".8" fill="#94A3B8" fillOpacity=".4" />
+          <path d="M830 563H850L848 666H832Z" fill="url(#desk-leg)" />
+          <path d="M832 563H834.5L834 666H832Z" fill="#E2E8F0" fillOpacity=".35" />
+          <rect x="826" y="664" width="30" height="7" rx="3" fill="#0B111E" />
+          <rect x="826" y="664" width="30" height="1.6" rx=".8" fill="#94A3B8" fillOpacity=".4" />
+          {/* apron under the top + shadow the desk casts on the knees */}
+          <rect x="250" y="553" width="620" height="10" fill="url(#desk-apron)" />
+          <rect x="262" y="563" width="596" height="46" fill="url(#under-shadow)" />
+          {/* walnut top surface with grain, sheen and lamp reflection */}
+          <path d="M276 506H844L890 541H230Z" fill="url(#walnut-top)" />
+          <g clipPath="url(#desk-top-clip)">
+            <path d={WOOD_GRAIN} stroke="#2A1709" strokeOpacity=".28" strokeWidth=".9" />
+            <path d="M276 506H844L852 516H268Z" fill="#fff" fillOpacity=".06" />
+            <path d="M276 506.5H844" stroke="#D9A066" strokeOpacity=".3" strokeWidth="1" />
+            {/* pools of light from the ceiling downlights + the floor lamp */}
+            <ellipse cx="430" cy="526" rx="70" ry="9" fill="#FEF3C7" fillOpacity=".11" filter="url(#blur-small)" />
+            <ellipse cx="700" cy="526" rx="70" ry="9" fill="#FEF3C7" fillOpacity=".09" filter="url(#blur-small)" />
+            <ellipse cx="800" cy="528" rx="64" ry="8" fill="#FDE68A" fillOpacity=".14" filter="url(#blur-small)" />
+            {/* soft contact shadows of everything standing on the desk */}
+            <ellipse cx="560" cy="535" rx="112" ry="5" fill="#000" fillOpacity=".45" filter="url(#blur-small)" />
+            <ellipse cx="354" cy="538" rx="30" ry="4" fill="#000" fillOpacity=".5" filter="url(#blur-small)" />
+            <ellipse cx="781" cy="539" rx="22" ry="3.2" fill="#000" fillOpacity=".5" filter="url(#blur-small)" />
+            <ellipse cx="742" cy="537" rx="15" ry="2.6" fill="#000" fillOpacity=".45" filter="url(#blur-small)" />
+          </g>
           <rect x="230" y="541" width="660" height="12" rx="2.5" fill="url(#walnut-edge)" />
           <path d="M232 541.5H888" stroke="#D97706" strokeOpacity=".25" strokeWidth="1" />
+          <path d="M232 543H888" stroke="#fff" strokeOpacity=".08" strokeWidth="1" />
           <ellipse cx="560" cy="534" rx="190" ry="8" fill="#60A5FA" fillOpacity=".14" />
         </g>
 
@@ -1061,27 +1207,30 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
         <path d="M390 528H730L744 540H376Z" fill="#090D16" />
         <path d="M390 528H730" stroke="#334155" strokeOpacity=".4" strokeWidth="1" />
 
-        {/* ───── iPhone on Aluminum Desk Stand + Connected USB-C Cable to MacBook ───── */}
+        {/* Forearms resting on the desk */}
+        <motion.g style={{ y: torsoY }}>
+          <RealisticArm side="left" attentive={attentive} />
+          <RealisticArm side="right" attentive={attentive} />
+        </motion.g>
+
+        {/* ───── iPhone on a weighted aluminium dock + USB-C cable to the MacBook ───── */}
         <g>
-          {/* Shadow under phone stand */}
-          <ellipse cx="348" cy="535" rx="28" ry="4" fill="#000" fillOpacity=".55" />
+          <ellipse cx="355" cy="538" rx="31" ry="4.5" fill="#000" fillOpacity=".55" />
+          {/* round weighted base */}
+          <path d="M326 534C326 531 338 529 353 529C368 529 380 531 380 534V537C380 540 368 542 353 542C338 542 326 540 326 537Z" fill="url(#alu-stand)" />
+          <ellipse cx="353" cy="531" rx="26" ry="3.2" fill="#E2E8F0" fillOpacity=".45" />
+          {/* neck + cradle */}
+          <path d="M349 531L350 512H356L357 531Z" fill="url(#alu-stand)" />
+          <rect x="336" y="500" width="34" height="12" rx="4" transform="rotate(-5 353 506)" fill="url(#alu-stand)" />
 
-          {/* Heavy Anodized Aluminum Stand Base & Angled Pillar */}
-          <path d="M324 531L332 526H366L374 531H324Z" fill="url(#alu-stand)" />
-          <rect x="324" y="531" width="50" height="3" rx="1.2" fill="#475569" />
-          <path d="M344 528L339 484H348L353 528Z" fill="url(#alu-stand)" />
-          {/* MagSafe / Cradle Lip holding the phone */}
-          <rect x="331" y="502" width="34" height="4" rx="2" transform="rotate(-5 348 504)" fill="#94A3B8" />
-
-          {/* Sleek Smartphone in Portrait on the Stand */}
+          {/* the phone */}
           <g transform="translate(324 426) rotate(-5)">
-            {/* Titanium Outer Frame */}
-            <rect x="0" y="0" width="44" height="84" rx="8" fill="#1E293B" stroke="#94A3B8" strokeWidth="1.5" />
-            {/* OLED Screen */}
+            <rect x="0" y="0" width="44" height="84" rx="8" fill="#1E293B" stroke="#A7B4C6" strokeWidth="1.5" />
+            <rect x="-1" y="18" width="1.6" height="9" rx=".8" fill="#94A3B8" />
+            <rect x="-1" y="30" width="1.6" height="14" rx=".8" fill="#94A3B8" />
+            <rect x="43.4" y="26" width="1.6" height="18" rx=".8" fill="#94A3B8" />
             <rect x="2.2" y="2.2" width="39.6" height="79.6" rx="6.5" fill="#020617" />
-            {/* Dynamic Island */}
             <rect x="15" y="4.5" width="14" height="3.2" rx="1.6" fill="#000" />
-            {/* Mobile App Dev UI / Live Reload Screen */}
             <rect x="6" y="12" width="32" height="14" rx="2.5" fill="#0F172A" />
             <path d="M9 17H22" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" />
             <path d="M9 21.5H31" stroke="#34D399" strokeWidth="1.8" strokeLinecap="round" />
@@ -1093,31 +1242,18 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
               <path d="M7 62H29" stroke="#A7F3D0" />
               <path d="M7 67H20" stroke="#FBBF24" />
             </g>
-            {/* Connected green status pill & iOS Home Indicator */}
             <circle cx="35" cy="6.1" r="1.2" fill="#34D399" />
             <rect x="14" y="78.5" width="16" height="1.4" rx="0.7" fill="#64748B" />
-            {/* Glass screen reflection */}
-            <path d="M3 3H24L8 80H3Z" fill="#fff" fillOpacity=".04" />
+            <path d="M3 3H24L8 80H3Z" fill="#fff" fillOpacity=".05" />
           </g>
+          {/* front lip of the cradle holding the phone */}
+          <rect x="338" y="503" width="30" height="5" rx="2" transform="rotate(-5 353 506)" fill="url(#alu-stand)" />
+          {/* screen glow on the desk */}
+          <ellipse cx="352" cy="537" rx="34" ry="3.5" fill="#38BDF8" fillOpacity=".1" />
 
-          {/* USB-C Connector Plugged into Bottom of Phone + Cable Connected to MacBook Left Port */}
-          <rect x="348" y="509" width="5" height="7" rx="1.5" transform="rotate(-5 350 512)" fill="#CBD5E1" />
-          <path
-            d="M351 516 C353 534 385 536 415 533 C436 531 446 529 458 529"
-            stroke="#0F172A"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <path
-            d="M351 516 C353 534 385 536 415 533 C436 531 446 529 458 529"
-            stroke="#64748B"
-            strokeOpacity=".55"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            fill="none"
-          />
-          {/* USB-C Thunderbolt Plug Inserted into MacBook Side */}
+          {/* cable from the dock to the MacBook's left port */}
+          <path d="M378 537C398 544 428 541 455 530" stroke="#0F172A" strokeWidth="3.2" strokeLinecap="round" fill="none" />
+          <path d="M378 537C398 544 428 541 455 530" stroke="#64748B" strokeOpacity=".5" strokeWidth="1.1" strokeLinecap="round" fill="none" />
           <rect x="453" y="527.2" width="6" height="3.5" rx="1" fill="#CBD5E1" />
         </g>
 
@@ -1133,6 +1269,17 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
           <rect x="468.5" y="406.5" width="183" height="121" rx="8.5" stroke="#CBD5E1" strokeOpacity=".5" strokeWidth="1" />
           {/* Subtle Metallic Anodized Sheen (No Diagonal Clipping Over Logo) */}
           <path d="M476 408H545L498 526H476Z" fill="#fff" fillOpacity=".035" />
+          {/* brushed-aluminium grain, top-edge catch-light, lower shading */}
+          <g clipPath="url(#lid-clip)">
+            <rect x="468" y="406" width="184" height="122" fill="url(#lid-sheen)" />
+            <path d="M590 406H640L560 528H510Z" fill="#fff" fillOpacity=".045" />
+            <path d="M468 410H652" stroke="#fff" strokeOpacity=".35" strokeWidth="1" />
+          </g>
+          {/* hinge barrel */}
+          <rect x="512" y="523" width="96" height="5" rx="2.5" fill="#1B2230" />
+          <rect x="512" y="523" width="96" height="1.2" rx=".6" fill="#94A3B8" fillOpacity=".35" />
+          {/* lid thickness on the right edge */}
+          <path d="M652 412Q655 414 655 418V520Q655 524 652 526Z" fill="#334155" />
 
           {/* Unibody Base Deck, Clutch Hinge & Rubber Feet */}
           <rect x="458" y="526" width="204" height="7" rx="3" fill="#475569" />
