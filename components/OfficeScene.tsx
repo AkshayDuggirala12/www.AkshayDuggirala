@@ -166,6 +166,28 @@ const WEARS_GLASSES = false;
 /** Navy shirt colours (light → dark), matching your reference photo. */
 const JACKET = ["#456BB5", "#2F4F8E", "#18294F"];
 
+/** Outline of the shirt (shoulders, sleeves, torso) — reused as a clip for fabric detail. */
+const SHIRT_PATH =
+  "M530 338C508 341 484 347 462 358C440 370 427 394 423 428C420 446 421 460 425 474L466 464C461 450 461 434 464 420C462 456 460 500 458 534H662C660 500 658 456 656 420C659 434 659 450 654 464L695 474C699 460 700 446 697 428C693 394 680 370 658 358C636 347 612 341 590 338L560 372Z";
+
+/** Trouser leg outline (left leg, right leg is mirrored) — also used as a clip. */
+const LEG_PATH =
+  "M480 560C480 553 491 549 505 549C519 549 530 553 530 560L528 596C527 618 526 636 525 652C517 655.5 511 653 505 655.5C499 653 493 655.5 485 652C484 636 483 618 482 596Z";
+
+/** Fine forearm hair, scattered inside the forearm shape. */
+const FOREARM_HAIR = (() => {
+  const r = rng(12);
+  let d = "";
+  for (let i = 0; i < 46; i++) {
+    const y = 470 + r() * 44;
+    const left = 428 + (y - 470) * 0.55;
+    const right = 465 + (y - 464) * 0.25;
+    const x = left + 3 + r() * Math.max(4, right - left - 6);
+    d += `M${x.toFixed(1)} ${y.toFixed(1)}l${(1.6 + r() * 1.6).toFixed(1)} ${(1 + r() * 1.2).toFixed(1)}`;
+  }
+  return d;
+})();
+
 /* ───────────────────────── glossy-floor reflections of the city lights ───────────────────────── */
 const FLOOR_STREAKS = (() => {
   const r = rng(31);
@@ -272,82 +294,88 @@ type Leaf = { x: number; y: number; r: number; s: number; shade: "dark" | "mid" 
 const shadeFill = (s: Leaf["shade"]) =>
   s === "dark" ? "url(#botanical-dark)" : s === "mid" ? "url(#botanical-mid)" : "url(#botanical-light)";
 
-/** Broad glossy fiddle-leaf-fig leaf with midrib and side veins. */
+/** Fiddle-leaf-fig leaf: waxy, slightly wavy edge, tapered midrib, curved side veins, one half catching the light. */
 function FigLeaf({ x, y, r, s, shade }: Leaf) {
+  const veinsL = "M0 -9C-6 -11 -12 -16 -16 -22M0 -19C-7 -21 -14 -27 -19 -35M0 -29C-8 -31 -14 -38 -18 -47M0 -40C-7 -42 -12 -48 -15 -56M0 -51C-5 -53 -9 -58 -10 -64";
+  const veinsR = "M0 -9C6 -11 12 -16 16 -22M0 -19C7 -21 14 -27 19 -35M0 -29C8 -31 14 -38 18 -47M0 -40C7 -42 12 -48 15 -56M0 -51C5 -53 9 -58 10 -64";
   return (
     <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`}>
+      {/* soft shadow under the leaf */}
+      <path d="M3 -1C-2 -5 -13 -11 -18 -25C-23 -41 -16 -60 -6 -70C1 -75 10 -74 12 -69C22 -59 28 -41 23 -25C18 -11 8 -4 3 -1Z" fill="#000" fillOpacity=".28" filter="url(#blur-fine)" />
+      {/* leaf blade */}
       <path
-        d="M0 0C-5 -4 -17 -10 -21 -27C-25 -44 -14 -64 0 -74C14 -64 25 -44 21 -27C17 -10 5 -4 0 0Z"
+        d="M0 0C-5 -5 -16 -11 -21 -26C-26 -41 -20 -58 -12 -68C-8 -73 -3 -73 0 -75C3 -73 9 -74 12 -69C20 -60 26 -42 21 -26C16 -11 5 -5 0 0Z"
         fill={shadeFill(shade)}
-        stroke="#8FC49B"
-        strokeOpacity=".3"
+        stroke="#0B1D12"
+        strokeOpacity=".55"
         strokeWidth=".9"
+        strokeLinejoin="round"
       />
-      <path d="M-13 -30C-11 -47 -5 -60 3 -67C-1 -52 -3 -40 -7 -27Z" fill="#fff" fillOpacity=".09" />
-      <path d="M0 -2C1 -26 0 -52 0 -72" stroke="#B9E0BF" strokeOpacity=".5" strokeWidth="1.5" strokeLinecap="round" />
-      <path
-        d="M0 -14L-15 -24M0 -26L-18 -38M0 -38L-16 -52M0 -50L-10 -62M0 -14L15 -24M0 -26L18 -38M0 -38L16 -52M0 -50L10 -62"
-        stroke="#B9E0BF"
-        strokeOpacity=".22"
-        strokeWidth=".9"
-        strokeLinecap="round"
-      />
+      {/* light-facing half */}
+      <path d="M0 -1C4 -6 14 -12 19 -26C23 -42 18 -59 9 -69C5 -73 1 -73 0 -74Z" fill="url(#leaf-sheen)" />
+      {/* waxy specular streak */}
+      <path d="M-13 -28C-12 -46 -6 -60 2 -68C-2 -54 -4 -40 -8 -26Z" fill="#fff" fillOpacity=".09" />
+      {/* veins */}
+      <path d={veinsL} stroke="#C9E3B8" strokeOpacity=".3" strokeWidth=".7" strokeLinecap="round" />
+      <path d={veinsR} stroke="#C9E3B8" strokeOpacity=".26" strokeWidth=".7" strokeLinecap="round" />
+      <path d="M0 -1C.6 -26 .3 -52 0 -73" stroke="#0B1D12" strokeOpacity=".45" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M0 -1C.6 -26 .3 -52 0 -73" stroke="#D5EBC2" strokeOpacity=".75" strokeWidth="1.3" strokeLinecap="round" />
     </g>
   );
 }
 
 const FIG_LEAVES: Leaf[] = [
-  { x: 149, y: 600, r: -78, s: 0.82, shade: "dark" },
-  { x: 168, y: 588, r: 76, s: 0.86, shade: "dark" },
+  { x: 149, y: 604, r: -80, s: 0.8, shade: "dark" },
+  { x: 168, y: 592, r: 78, s: 0.84, shade: "dark" },
+  { x: 150, y: 574, r: -68, s: 0.9, shade: "dark" },
   { x: 150, y: 560, r: -62, s: 0.98, shade: "mid" },
   { x: 168, y: 548, r: 60, s: 1.0, shade: "mid" },
+  { x: 168, y: 530, r: 70, s: 0.88, shade: "dark" },
   { x: 151, y: 520, r: -46, s: 1.0, shade: "light" },
   { x: 168, y: 508, r: 46, s: 1.02, shade: "mid" },
+  { x: 150, y: 496, r: -58, s: 0.84, shade: "mid" },
   { x: 152, y: 482, r: -30, s: 0.96, shade: "light" },
   { x: 167, y: 470, r: 30, s: 0.94, shade: "mid" },
+  { x: 168, y: 458, r: 54, s: 0.78, shade: "light" },
   { x: 156, y: 448, r: -14, s: 0.86, shade: "light" },
   { x: 164, y: 440, r: 14, s: 0.8, shade: "mid" },
   { x: 160, y: 430, r: 0, s: 0.72, shade: "light" },
 ];
 
-/** Snake-plant blade: wide, pointed, yellow-edged, with dark cross-banding. */
+/** Snake-plant blade: sword shape, yellow margin, mottled cross-banding, glossy centre groove, warm lamp rim. */
 function SnakeBlade({ dx, h, w, lean }: { dx: number; h: number; w: number; lean: number }) {
-  const bands = [0.16, 0.3, 0.44, 0.58, 0.72].map((u) => {
+  const outline = `M${-w} 0C${-w * 1.08} ${-h * 0.3} ${-w * 0.7 + lean * 0.4} ${-h * 0.7} ${lean} ${-h}C${w * 0.7 + lean * 0.4} ${-h * 0.7} ${w * 1.08} ${-h * 0.3} ${w} 0Z`;
+  const band = (u: number) => {
     const y = -h * u;
     const cx = lean * u * u;
-    const hw = w * (1 - u * 0.8) * 0.85;
-    return `M${(cx - hw).toFixed(1)} ${y.toFixed(1)}Q${cx.toFixed(1)} ${(y - 5).toFixed(1)} ${(cx + hw).toFixed(1)} ${y.toFixed(1)}`;
-  });
+    const hw = w * (1 - u * 0.78) * 0.8;
+    return `M${(cx - hw).toFixed(1)} ${y.toFixed(1)}Q${cx.toFixed(1)} ${(y - 6).toFixed(1)} ${(cx + hw).toFixed(1)} ${y.toFixed(1)}`;
+  };
+  const dark = [0.12, 0.26, 0.4, 0.54, 0.68, 0.82].map(band).join("");
+  const light = [0.19, 0.33, 0.47, 0.61, 0.75].map(band).join("");
   return (
-    <g transform={`translate(${1090 + dx} 654)`}>
-      <path
-        d={`M${-w} 0C${-w * 1.05} ${-h * 0.35} ${-w * 0.6 + lean * 0.5} ${-h * 0.72} ${lean} ${-h}C${w * 0.6 + lean * 0.5} ${-h * 0.72} ${w * 1.05} ${-h * 0.35} ${w} 0Z`}
-        fill="url(#botanical-mid)"
-        stroke="#C7D58A"
-        strokeOpacity=".5"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path d={bands.join("")} stroke="#0C1F14" strokeOpacity=".38" strokeWidth="1.4" strokeLinecap="round" />
-      <path
-        d={`M0 -4C${lean * 0.1} ${-h * 0.35} ${lean * 0.4} ${-h * 0.72} ${lean} ${-h + 4}`}
-        stroke="#A7D3AE"
-        strokeOpacity=".22"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
+    <g transform={`translate(${1090 + dx} 650)`}>
+      <path d={outline} fill="url(#snake-body)" stroke="#CFCF7E" strokeOpacity=".55" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d={dark} stroke="#07150E" strokeOpacity=".5" strokeWidth="2.2" strokeLinecap="round" />
+      <path d={light} stroke="#7FB08A" strokeOpacity=".22" strokeWidth="1.4" strokeLinecap="round" />
+      {/* glossy centre groove */}
+      <path d={`M0 -4C${lean * 0.1} ${-h * 0.35} ${lean * 0.4} ${-h * 0.72} ${lean} ${-h + 4}`} stroke="#B8E0BE" strokeOpacity=".3" strokeWidth="1.8" strokeLinecap="round" />
+      {/* warm light from the floor lamp on the lamp-facing edge */}
+      <path d={`M${-w} -2C${-w * 1.05} ${-h * 0.3} ${-w * 0.7 + lean * 0.4} ${-h * 0.7} ${lean} ${-h}`} stroke="#FDE68A" strokeOpacity=".32" strokeWidth="1.4" strokeLinecap="round" />
     </g>
   );
 }
 
 const SNAKE_BLADES = [
-  { dx: 5, h: 224, w: 15, lean: 3 },
-  { dx: -7, h: 196, w: 15, lean: -7 },
-  { dx: 17, h: 178, w: 14, lean: 12 },
-  { dx: -19, h: 150, w: 13, lean: -16 },
-  { dx: 28, h: 132, w: 12, lean: 20 },
-  { dx: -30, h: 104, w: 11, lean: -22 },
-  { dx: 36, h: 86, w: 10, lean: 26 },
+  { dx: 0, h: 236, w: 15, lean: 4 },
+  { dx: -7, h: 205, w: 14, lean: -10 },
+  { dx: 9, h: 190, w: 13, lean: 16 },
+  { dx: -13, h: 168, w: 13, lean: -22 },
+  { dx: 15, h: 150, w: 12, lean: 26 },
+  { dx: -17, h: 128, w: 11, lean: -30 },
+  { dx: 18, h: 118, w: 11, lean: 34 },
+  { dx: -20, h: 92, w: 10, lean: -32 },
+  { dx: 21, h: 84, w: 9, lean: 36 },
 ];
 
 /* ───────────────────────── anatomically synced legs & arms ───────────────────────── */
@@ -355,25 +383,37 @@ function SeatedLeg({ side }: { side: "left" | "right" }) {
   const isRight = side === "right";
   return (
     <g transform={isRight ? "translate(1120 0) scale(-1 1)" : undefined}>
-      <ellipse cx="505" cy="673" rx="38" ry="4.5" fill="#000" fillOpacity=".6" />
+      <ellipse cx="505" cy="678" rx="42" ry="5" fill="#000" fillOpacity=".65" filter="url(#blur-small)" />
 
-      {/* knee (tucked under the desk) and tapered shin */}
-      <path d="M481 564C481 556 491 552 505 552C519 552 529 556 529 564L526 598C525 620 524 638 523 652H487C486 638 485 620 484 598Z" fill="url(#pants)" />
-      <ellipse cx="505" cy="571" rx="14" ry="9" fill="#94A3B8" fillOpacity=".14" filter="url(#blur-small)" />
-      <path d="M500 592C501 612 501 630 500 646" stroke="#94A3B8" strokeOpacity=".09" strokeWidth="8" strokeLinecap="round" filter="url(#blur-small)" />
-      <path d="M489 579Q505 586 521 579" stroke="#020617" strokeOpacity=".4" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M492 613Q505 618 518 613" stroke="#020617" strokeOpacity=".28" strokeWidth="1.2" strokeLinecap="round" />
+      {/* sneaker, front three-quarter view */}
+      <path d="M489 650H521L525 659C531 662 537 665 537 669H473C473 665 479 662 485 659Z" fill="url(#shoe)" />
+      <path d="M497 652H513L514 659H496Z" fill="#334155" />
+      <path d="M494 655.5H516M493 659H517" stroke="#CBD5E1" strokeOpacity=".7" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="493" cy="655.5" r=".9" fill="#0B1220" />
+      <circle cx="517" cy="655.5" r=".9" fill="#0B1220" />
+      <path d="M475 669C475 663 486 660 505 660C524 660 535 663 535 669Z" fill="#1E293B" />
+      <path d="M478 667C484 662.5 526 662.5 532 667" stroke="#94A3B8" strokeOpacity=".4" strokeWidth=".8" strokeDasharray="2 1.6" />
+      <path d="M480 664.5C490 661.5 505 661.5 514 662.5" stroke="#fff" strokeOpacity=".16" strokeWidth="1.8" strokeLinecap="round" filter="url(#blur-fine)" />
+      {/* midsole + outsole */}
+      <path d="M472 668H538C539.5 673 537.5 677.5 532 678H478C472.5 677.5 470.5 673 472 668Z" fill="#E2E8F0" />
+      <path d="M472 668.4H538" stroke="#fff" strokeOpacity=".8" strokeWidth="1" />
+      <path d="M471.5 674H538.5" stroke="#0F172A" strokeOpacity=".3" strokeWidth="1.3" />
+      <path d="M478 678.2H532" stroke="#020617" strokeOpacity=".65" strokeWidth="1.6" strokeLinecap="round" />
 
-      {/* hem bunching + sock */}
-      <path d="M487 642C494 647 499 643 505 648C511 643 517 647 523 642L524 654H486Z" fill="#0A101C" />
-      <rect x="490" y="650" width="30" height="5" fill="#0B1220" />
-
-      {/* sneaker */}
-      <path d="M483 652H523C531 652 538 657 539 665L540 668H471C470 660 474 653 483 652Z" fill="url(#shoe)" />
-      <path d="M514 660C523 658.5 534 661 539 667H516Z" fill="#fff" fillOpacity=".07" />
-      <path d="M492 656H512M490 660H514M488 664H516" stroke="#CBD5E1" strokeOpacity=".55" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M469 667H541C541 671 539 673.5 535 674H473C470 673.5 469 671 469 667Z" fill="#E2E8F0" />
-      <path d="M470 672.4H540" stroke="#0F172A" strokeOpacity=".4" strokeWidth="1.6" />
+      {/* trouser leg: cloth texture, knee bulge, stress creases, front crease, hem break */}
+      <g clipPath="url(#leg-clip)">
+        <path d={LEG_PATH} fill="url(#pants)" />
+        <rect x="478" y="548" width="54" height="110" fill="#000" filter="url(#fabric-tex)" opacity=".55" />
+        <ellipse cx="503" cy="573" rx="15" ry="11" fill="#94A3B8" fillOpacity=".17" filter="url(#blur-small)" />
+        <path d="M486 584C496 590 514 590 524 584M488 592C497 597 513 597 523 592M490 600C498 604 512 604 520 600" stroke="#020617" strokeOpacity=".38" strokeWidth="1.5" strokeLinecap="round" filter="url(#blur-fine)" />
+        <path d="M487 583C497 588 513 588 523 583" stroke="#94A3B8" strokeOpacity=".16" strokeWidth="1" strokeLinecap="round" />
+        <path d="M505 602C506 620 506 636 505 654" stroke="#020617" strokeOpacity=".32" strokeWidth="1.8" filter="url(#blur-fine)" />
+        <path d="M507.8 602C508.8 620 508.8 636 507.8 654" stroke="#94A3B8" strokeOpacity=".11" strokeWidth="1.2" />
+        <path d="M527 560C528 592 527 630 526 654" stroke="#000" strokeOpacity=".34" strokeWidth="10" filter="url(#blur-small)" />
+        <path d="M486 641C494 647 500 642 505 647C510 642 516 647 524 641M487 647C495 652 501 648 505 652C510 648 516 652 523 647" stroke="#020617" strokeOpacity=".42" strokeWidth="1.4" strokeLinecap="round" fill="none" filter="url(#blur-fine)" />
+        <rect x="480" y="642" width="52" height="14" fill="#000" fillOpacity=".2" />
+      </g>
+      <path d="M485 652C493 655.5 499 653 505 655.5C511 653 517 655.5 525 652" stroke="#05080F" strokeOpacity=".7" strokeWidth="1.3" fill="none" />
     </g>
   );
 }
@@ -383,23 +423,44 @@ function RealisticArm({ side, attentive }: { side: "left" | "right"; attentive: 
   return (
     <g transform={isRight ? "translate(1120 0) scale(-1 1)" : undefined}>
       <g className={`typing-arm typing-arm--${side} ${attentive ? "is-resting" : ""}`}>
-        {/* forearm resting on the desk, running in toward the keys behind the lid */}
-        <path d="M430 468C432 490 450 510 486 521L494 506C478 500 468 488 465 466Z" fill="url(#skin-arm)" />
-        <path d="M434 480C442 498 460 512 484 520" stroke="#6B3E24" strokeOpacity=".3" strokeWidth="2" strokeLinecap="round" />
-        <path d="M440 470C446 488 462 500 482 507" stroke="#E0A67C" strokeOpacity=".18" strokeWidth="3" strokeLinecap="round" />
-        {/* rolled sleeve cuff */}
-        <path d="M423 457L466 446L468 463L426 475Z" fill="#1B3263" stroke="#0E1B3C" strokeWidth="1" strokeLinejoin="round" />
-        <path d="M424 459L465 448" stroke="#8FB0F0" strokeOpacity=".3" strokeWidth="1.2" strokeLinecap="round" />
+        {/* shadow cast on the desk */}
+        <ellipse cx="462" cy="535" rx="30" ry="4" fill="#000" fillOpacity=".42" filter="url(#blur-small)" />
+
+        {/* thumb + back of the hand resting on the desk pad (rest tucks behind the lid) */}
+        <path d="M449 517C447 527 452 535 462 537C469 538 476 536 481 532L484 520L474 512Z" fill="url(#forearm)" />
+        <path d="M448 520C441 527 443 536 452 539C457 540 461 538 459 534C456 533 454 530 455 526Z" fill="url(#forearm)" />
+        <path d="M444.5 531C445 535 448 538 452 538.5" stroke="#4A2814" strokeOpacity=".35" strokeWidth="1" strokeLinecap="round" />
+        <ellipse cx="449.5" cy="535" rx="3" ry="2" fill="#F1D3BC" fillOpacity=".55" transform="rotate(-35 449.5 535)" />
+        <path d="M456 528C460 531 466 532 472 531" stroke="#E7B28A" strokeOpacity=".3" strokeWidth="2" strokeLinecap="round" />
+        <path d="M451 537C458 540 468 539 478 535" stroke="#3A1F0E" strokeOpacity=".4" strokeWidth="1.2" strokeLinecap="round" />
+
+        {/* forearm */}
+        <path d="M427 468C425 492 436 512 456 524L478 516C471 504 467 488 466 464Z" fill="url(#forearm)" />
+        <path d="M436 476C438 494 446 508 460 517" stroke="#E7B28A" strokeOpacity=".3" strokeWidth="5" strokeLinecap="round" filter="url(#blur-fine)" />
+        <path d="M463 472C464 490 469 503 475 513" stroke="#3A1F0E" strokeOpacity=".4" strokeWidth="4" strokeLinecap="round" filter="url(#blur-fine)" />
+        <path d={FOREARM_HAIR} stroke="#241208" strokeOpacity=".42" strokeWidth=".6" strokeLinecap="round" />
+        <path d="M452 505C456 511 461 515 466 518M458 500C462 506 466 511 471 514" stroke="#6B3E24" strokeOpacity=".3" strokeWidth="1" strokeLinecap="round" />
+        <ellipse cx="445" cy="513" rx="4" ry="3" fill="#E0A67C" fillOpacity=".25" />
+
         {/* wristwatch (left wrist) */}
         {!isRight && (
           <g>
-            <path d="M450 506L466 488" stroke="#0F172A" strokeWidth="6" strokeLinecap="round" />
-            <circle cx="458" cy="497" r="5.2" fill="#1E293B" stroke="#94A3B8" strokeWidth="1.2" />
-            <circle cx="458" cy="497" r="2.6" fill="#38BDF8" fillOpacity=".5" />
+            <path d="M432 502L469 490" stroke="#0A101C" strokeWidth="7.5" strokeLinecap="round" />
+            <path d="M434 499.5L467 489" stroke="#475569" strokeOpacity=".5" strokeWidth="1" strokeLinecap="round" />
+            <circle cx="451" cy="495" r="6.6" fill="#0F172A" stroke="#9CA3AF" strokeWidth="1.4" />
+            <circle cx="451" cy="495" r="4.7" fill="#05080F" />
+            <path d="M451 495V491.6M451 495L453.6 496.6" stroke="#E5E7EB" strokeWidth=".9" strokeLinecap="round" />
+            <circle cx="451" cy="495" r=".8" fill="#38BDF8" />
+            <path d="M446.5 491.5C448.5 489.8 452 489.6 454 490.4" stroke="#fff" strokeOpacity=".5" strokeWidth=".9" strokeLinecap="round" />
           </g>
         )}
-        {/* hand tucked behind the lid */}
-        <path d="M476 508C472 514 476 523 486 525L512 524C516 523 518 516 513 512L488 502Z" fill="url(#skin-arm)" />
+
+        {/* rolled sleeve cuff with stitching and a shadow on the skin */}
+        <path d="M426 475L468 463L469 471L428 483Z" fill="#000" fillOpacity=".28" filter="url(#blur-fine)" />
+        <path d="M423 457L466 446L468 463L426 475Z" fill="#1B3263" stroke="#0E1B3C" strokeWidth="1" strokeLinejoin="round" />
+        <path d="M424 459L465 448" stroke="#8FB0F0" strokeOpacity=".32" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M425 470L467 458" stroke="#0A1430" strokeOpacity=".55" strokeWidth=".8" strokeDasharray="2.4 2" />
+        <path d="M430 464L458 456" stroke="#050A18" strokeOpacity=".35" strokeWidth="3" strokeLinecap="round" filter="url(#blur-fine)" />
       </g>
     </g>
   );
@@ -776,29 +837,78 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
             <circle cx=".7" cy=".8" r=".45" fill="#000" fillOpacity=".55" />
             <circle cx="2.3" cy="2.2" r=".4" fill="#000" fillOpacity=".45" />
           </pattern>
+          {/* ── realism additions ── */}
+          <linearGradient id="forearm" x1="0" y1="0" x2="1" y2="0.3">
+            <stop stopColor="#8E5B3A" />
+            <stop offset=".35" stopColor="#CB8E64" />
+            <stop offset=".7" stopColor="#B27A52" />
+            <stop offset="1" stopColor="#7E4D30" />
+          </linearGradient>
+          <linearGradient id="leaf-sheen" x1="0" y1="0" x2="1" y2="0">
+            <stop stopColor="#D9F99D" stopOpacity="0" />
+            <stop offset=".55" stopColor="#D9F99D" stopOpacity=".2" />
+            <stop offset="1" stopColor="#D9F99D" stopOpacity=".05" />
+          </linearGradient>
+          <linearGradient id="snake-body" x1="0" y1="0" x2="1" y2="0">
+            <stop stopColor="#3C6E4C" />
+            <stop offset=".4" stopColor="#24503A" />
+            <stop offset=".8" stopColor="#12301F" />
+            <stop offset="1" stopColor="#0C2016" />
+          </linearGradient>
+          <linearGradient id="pot-glaze" x1="0" y1="0" x2="1" y2="0">
+            <stop stopColor="#141B2A" />
+            <stop offset=".2" stopColor="#5B6A85" />
+            <stop offset=".48" stopColor="#2C3850" />
+            <stop offset="1" stopColor="#080B14" />
+          </linearGradient>
+          <filter id="wood-tex" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.006 0.24" numOctaves="4" seed="8" result="n" />
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.16  0 0 0 0 0.09  0 0 0 0 0.04  0 0 0 1.7 -0.6" result="g" />
+            <feComposite in="g" in2="SourceAlpha" operator="in" />
+          </filter>
+          <filter id="fabric-tex" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9 0.7" numOctaves="2" seed="3" result="n" />
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 -0.38" />
+          </filter>
+          <clipPath id="shirt-clip">
+            <path d={SHIRT_PATH} />
+          </clipPath>
+          <clipPath id="leg-clip">
+            <path d={LEG_PATH} />
+          </clipPath>
         </defs>
 
         {/* ───── Left fiddle-leaf fig tree in a ceramic pot ───── */}
         <ellipse cx="158" cy="708" rx="62" ry="9" fill="#000" fillOpacity=".55" filter="url(#blur-soft)" />
         <g>
-          {/* woody trunk with a light edge */}
-          <path d="M158 640C154 600 164 560 158 520C153 490 162 460 160 426" stroke="#3E2C1E" strokeWidth="6" strokeLinecap="round" />
-          <path d="M160 640C156 600 166 560 160 520C155 490 164 460 162 426" stroke="#8A6A4A" strokeOpacity=".4" strokeWidth="1.6" strokeLinecap="round" />
-          {/* short petioles joining each leaf to the trunk */}
+          {/* trunk: dark core, bark highlight, growth nodes */}
+          <path d="M158 640C154 600 164 560 158 520C153 490 162 460 160 426" stroke="#2B1E14" strokeWidth="7.5" strokeLinecap="round" />
+          <path d="M159 640C155 600 165 560 159 520C154 490 163 460 161 426" stroke="#5A4230" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M161 640C157 600 167 560 161 520C156 490 165 460 163 426" stroke="#B38E66" strokeOpacity=".45" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M153 596h9M156 556h9M153 518h8M156 484h7M157 452h6" stroke="#1B120B" strokeOpacity=".6" strokeWidth="1.4" strokeLinecap="round" />
+          {/* petioles */}
           {FIG_LEAVES.map((l, i) => (
-            <path key={`p${i}`} d={`M159 ${l.y + 3}L${l.x} ${l.y}`} stroke="#2F4A2E" strokeWidth="2" strokeLinecap="round" />
+            <path key={`p${i}`} d={`M159 ${l.y + 3}L${l.x} ${l.y}`} stroke="#2F4A2E" strokeWidth="2.2" strokeLinecap="round" />
           ))}
           {FIG_LEAVES.map((l, i) => (
             <FigLeaf key={i} {...l} />
           ))}
-          {/* pot body, rim, soil, pebbles, highlight */}
-          <path d="M122 640H194L186 708H130Z" fill="url(#ceramic-pot)" />
-          <path d="M118 632H198L196 644H120Z" fill="url(#ceramic-pot)" />
-          <path d="M118 632H198" stroke="#94A3B8" strokeOpacity=".35" strokeWidth="1" />
+          {/* glazed ceramic pot */}
+          <path d="M122 640H194L186 708H130Z" fill="url(#pot-glaze)" />
+          <path d="M130 708H186L187 699H129Z" fill="#000" fillOpacity=".3" />
+          <path d="M118 632H198L196 644H120Z" fill="url(#pot-glaze)" />
+          <path d="M118 632H198" stroke="#CBD5E1" strokeOpacity=".45" strokeWidth="1" />
+          <path d="M120 644H196" stroke="#000" strokeOpacity=".45" strokeWidth="2" filter="url(#blur-fine)" />
           <ellipse cx="158" cy="633" rx="39" ry="5.5" fill="url(#soil)" />
-          <circle cx="146" cy="632" r="1.6" fill="#475569" />
-          <circle cx="170" cy="634" r="1.3" fill="#64748B" />
-          <path d="M134 652L140 702" stroke="#fff" strokeOpacity=".07" strokeWidth="6" strokeLinecap="round" />
+          <g fill="#64748B">
+            <circle cx="142" cy="632" r="1.7" />
+            <circle cx="149" cy="635" r="1.3" fill="#475569" />
+            <circle cx="168" cy="634" r="1.4" />
+            <circle cx="175" cy="632" r="1.6" fill="#475569" />
+            <circle cx="158" cy="636" r="1.2" />
+          </g>
+          <path d="M136 650L141 700" stroke="#fff" strokeOpacity=".17" strokeWidth="5" strokeLinecap="round" filter="url(#blur-fine)" />
+          <path d="M186 650L182 700" stroke="#000" strokeOpacity=".3" strokeWidth="7" strokeLinecap="round" filter="url(#blur-small)" />
         </g>
 
         {/* ───── Floor lamp (glowing shade, soft light cone) + snake plant ───── */}
@@ -820,15 +930,20 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
           {SNAKE_BLADES.map((b, i) => (
             <SnakeBlade key={i} {...b} />
           ))}
-          <path d="M1060 652H1120L1113 708H1067Z" fill="url(#ceramic-pot)" />
-          <path d="M1055 644H1125L1123 656H1057Z" fill="url(#ceramic-pot)" />
-          <path d="M1055 644H1125" stroke="#94A3B8" strokeOpacity=".35" strokeWidth="1" />
+          <path d="M1060 652H1120L1113 708H1067Z" fill="url(#pot-glaze)" />
+          <path d="M1067 708H1113L1114 699H1066Z" fill="#000" fillOpacity=".3" />
+          <path d="M1055 644H1125L1123 656H1057Z" fill="url(#pot-glaze)" />
+          <path d="M1055 644H1125" stroke="#CBD5E1" strokeOpacity=".45" strokeWidth="1" />
+          <path d="M1057 656H1123" stroke="#000" strokeOpacity=".45" strokeWidth="2" filter="url(#blur-fine)" />
           <ellipse cx="1090" cy="645" rx="33" ry="5" fill="url(#soil)" />
-          <circle cx="1080" cy="645" r="1.4" fill="#475569" />
-          <circle cx="1100" cy="646" r="1.2" fill="#64748B" />
-          <path d="M1070 662L1074 702" stroke="#fff" strokeOpacity=".07" strokeWidth="5" strokeLinecap="round" />
-          {/* warm lamp light catching the pot */}
-          <path d="M1110 652L1106 702" stroke="#FDE68A" strokeOpacity=".12" strokeWidth="4" strokeLinecap="round" />
+          <g fill="#64748B">
+            <circle cx="1078" cy="645" r="1.5" />
+            <circle cx="1088" cy="647" r="1.2" fill="#475569" />
+            <circle cx="1100" cy="646" r="1.4" />
+            <circle cx="1108" cy="644.5" r="1.2" fill="#475569" />
+          </g>
+          <path d="M1070 662L1074 702" stroke="#fff" strokeOpacity=".15" strokeWidth="5" strokeLinecap="round" filter="url(#blur-fine)" />
+          <path d="M1111 652L1107 702" stroke="#000" strokeOpacity=".3" strokeWidth="6" strokeLinecap="round" filter="url(#blur-small)" />
         </g>
 
         {/* ───── Ergonomic Executive Chair ───── */}
@@ -856,6 +971,13 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
             />
             {/* shadow the jaw throws on the neck */}
             <path d="M535 300C546 320 574 320 585 300V328C573 340 547 340 535 328Z" fill="#000" fillOpacity=".28" />
+            {/* neck anatomy: sternocleidomastoid cords, throat hollow, collarbones */}
+            <path d="M541 318C543 330 548 342 556 352M579 318C577 330 572 342 564 352" stroke="#4A2814" strokeOpacity=".34" strokeWidth="3.4" strokeLinecap="round" filter="url(#blur-fine)" />
+            <path d="M545 320C547 330 551 338 556 345M575 320C573 330 569 338 564 345" stroke="#E0A67C" strokeOpacity=".2" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M552 352Q560 358 568 352" stroke="#3A1F0E" strokeOpacity=".4" strokeWidth="2" strokeLinecap="round" filter="url(#blur-fine)" />
+            <path d="M548 350C538 349 528 345 521 340M572 350C582 349 592 345 599 340" stroke="#E0A67C" strokeOpacity=".28" strokeWidth="1.6" strokeLinecap="round" />
+            <path d="M548 353C538 352 528 348 521 343M572 353C582 352 592 348 599 343" stroke="#3A1F0E" strokeOpacity=".3" strokeWidth="1.8" strokeLinecap="round" filter="url(#blur-fine)" />
+            <path d="M560 356V372" stroke="#3A1F0E" strokeOpacity=".25" strokeWidth="2" strokeLinecap="round" filter="url(#blur-fine)" />
 
             {/* LAYER B: Head Unit (Pivots smoothly from the neck without any harsh cut line) */}
             <motion.g
@@ -1130,6 +1252,22 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
             {/* LAYER C: navy button-up — shoulders, upper arms and torso in one piece */}
             <path d="M530 338C508 341 484 347 462 358C440 370 427 394 423 428C420 446 421 460 425 474L466 464C461 450 461 434 464 420C462 456 460 500 458 534H662C660 500 658 456 656 420C659 434 659 450 654 464L695 474C699 460 700 446 697 428C693 394 680 370 658 358C636 347 612 341 590 338L560 372Z" fill="url(#jacket)" />
             <path d="M530 338C508 341 484 347 462 358C440 370 427 394 423 428C420 446 421 460 425 474L466 464C461 450 461 434 464 420C462 456 460 500 458 534H662C660 500 658 456 656 420C659 434 659 450 654 464L695 474C699 460 700 446 697 428C693 394 680 370 658 358C636 347 612 341 590 338L560 372Z" fill="url(#shirt-shade)" />
+            {/* cotton weave, soft folds, seams and light — all clipped to the shirt */}
+            <g clipPath="url(#shirt-clip)">
+              <rect x="420" y="330" width="280" height="210" fill="#000" filter="url(#fabric-tex)" opacity=".5" />
+              <ellipse cx="560" cy="396" rx="96" ry="34" fill="url(#screen-spill)" opacity=".16" />
+              <path d="M648 362C672 372 688 392 694 422" stroke="#FDE68A" strokeOpacity=".24" strokeWidth="7" strokeLinecap="round" filter="url(#blur-small)" />
+              <path d="M516 346C540 362 580 362 604 346" stroke="#050A18" strokeOpacity=".4" strokeWidth="8" strokeLinecap="round" filter="url(#blur-small)" />
+              {/* upper-arm folds + elbow creases (mirrored on both sleeves) */}
+              <path d="M444 392C440 412 440 430 444 446M676 392C680 412 680 430 676 446" stroke="#050A18" strokeOpacity=".3" strokeWidth="5" strokeLinecap="round" filter="url(#blur-fine)" />
+              <path d="M428 452C440 450 452 454 464 462M427 460C440 458 452 462 466 470M692 452C680 450 668 454 656 462M693 460C680 458 668 462 654 470" stroke="#050A18" strokeOpacity=".34" strokeWidth="2.6" strokeLinecap="round" filter="url(#blur-fine)" />
+              <path d="M430 449C441 447 453 451 463 458M690 449C679 447 667 451 657 458" stroke="#8FB0F0" strokeOpacity=".16" strokeWidth="1" strokeLinecap="round" />
+              {/* shoulder / armhole seams (stitched) */}
+              <path d="M470 352C462 372 458 394 462 420M650 352C658 372 662 394 658 420" stroke="#0A1430" strokeOpacity=".6" strokeWidth=".9" strokeDasharray="2.6 2" />
+              <path d="M520 342C506 346 490 351 474 358M600 342C614 346 630 351 646 358" stroke="#0A1430" strokeOpacity=".5" strokeWidth=".9" strokeDasharray="2.6 2" />
+              {/* lower body: falls into shadow under the desk lip */}
+              <rect x="440" y="486" width="240" height="52" fill="#000" fillOpacity=".24" />
+            </g>
             {/* trapezius / shoulder highlight and armpit shadows */}
             <path d="M486 350C466 358 446 372 436 396" stroke="#fff" strokeOpacity=".1" strokeWidth="5" strokeLinecap="round" />
             <path d="M634 350C654 358 674 372 684 396" stroke="#fff" strokeOpacity=".1" strokeWidth="5" strokeLinecap="round" />
@@ -1161,6 +1299,8 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
             <path d="M524 335L558 372L543 392L514 360Z" fill="#2B4B8C" stroke="#0E1B3C" strokeWidth="1" strokeLinejoin="round" />
             <path d="M596 335L562 372L577 392L606 360Z" fill="#2B4B8C" stroke="#0E1B3C" strokeWidth="1" strokeLinejoin="round" />
             <path d="M525 337L516 359M595 337L604 359" stroke="#8FB0F0" strokeOpacity=".3" strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M524 338L556 372M596 338L564 372" stroke="#0A1430" strokeOpacity=".55" strokeWidth=".8" strokeDasharray="2.2 1.8" />
+            <path d="M516 361L543 391M604 361L577 391" stroke="#050A18" strokeOpacity=".35" strokeWidth="2.4" strokeLinecap="round" filter="url(#blur-fine)" />
           </g>
 
           
@@ -1169,15 +1309,18 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
         {/* ───── Executive Walnut Desk ───── */}
         <ellipse cx="560" cy="684" rx="340" ry="20" fill="#000" fillOpacity=".55" filter="url(#blur-soft)" />
         <g>
-          {/* brushed-steel legs with adjustable feet */}
-          <path d="M270 563H290L288 666H272Z" fill="url(#desk-leg)" />
-          <path d="M272 563H274.5L274 666H272Z" fill="#E2E8F0" fillOpacity=".35" />
-          <rect x="264" y="664" width="30" height="7" rx="3" fill="#0B111E" />
-          <rect x="264" y="664" width="30" height="1.6" rx=".8" fill="#94A3B8" fillOpacity=".4" />
-          <path d="M830 563H850L848 666H832Z" fill="url(#desk-leg)" />
-          <path d="M832 563H834.5L834 666H832Z" fill="#E2E8F0" fillOpacity=".35" />
-          <rect x="826" y="664" width="30" height="7" rx="3" fill="#0B111E" />
-          <rect x="826" y="664" width="30" height="1.6" rx=".8" fill="#94A3B8" fillOpacity=".4" />
+          {/* brushed-steel legs: bevelled tube, dark side face, bolt, adjustable feet */}
+          {[[268, 292], [828, 852]].map(([a, b]) => (
+            <g key={a}>
+              <path d={`M${a} 563H${b}L${b - 2} 666H${a + 2}Z`} fill="url(#desk-leg)" />
+              <path d={`M${a} 563H${a + 4}L${a + 3} 666H${a + 2}Z`} fill="#E2E8F0" fillOpacity=".45" />
+              <path d={`M${b - 4} 563H${b}L${b - 2} 666H${b - 5}Z`} fill="#000" fillOpacity=".38" />
+              <circle cx={(a + b) / 2} cy="580" r="1.8" fill="#0F172A" />
+              <circle cx={(a + b) / 2 - 0.6} cy="579.5" r=".7" fill="#CBD5E1" fillOpacity=".7" />
+              <path d={`M${a - 5} 664H${b + 5}L${b + 3} 671H${a - 3}Z`} fill="#0B111E" />
+              <path d={`M${a - 5} 664H${b + 5}`} stroke="#94A3B8" strokeOpacity=".45" strokeWidth="1.4" />
+            </g>
+          ))}
           {/* apron under the top + shadow the desk casts on the knees */}
           <rect x="250" y="553" width="620" height="10" fill="url(#desk-apron)" />
           <rect x="262" y="563" width="596" height="46" fill="url(#under-shadow)" />
@@ -1185,6 +1328,10 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
           <path d="M276 506H844L890 541H230Z" fill="url(#walnut-top)" />
           <g clipPath="url(#desk-top-clip)">
             <path d={WOOD_GRAIN} stroke="#2A1709" strokeOpacity=".28" strokeWidth=".9" />
+            {/* real wood figure: stretched noise, plank seams, depth */}
+            <path d="M276 506H844L890 541H230Z" fill="#000" filter="url(#wood-tex)" opacity=".6" />
+            <path d="M418 506L395 541M560 506L560 541M702 506L725 541" stroke="#1A0E05" strokeOpacity=".35" strokeWidth=".9" />
+            <path d="M419 506L396 541M561 506L561 541M703 506L726 541" stroke="#D9A066" strokeOpacity=".12" strokeWidth=".8" />
             <path d="M276 506H844L852 516H268Z" fill="#fff" fillOpacity=".06" />
             <path d="M276 506.5H844" stroke="#D9A066" strokeOpacity=".3" strokeWidth="1" />
             {/* pools of light from the ceiling downlights + the floor lamp */}
@@ -1200,6 +1347,8 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
           <rect x="230" y="541" width="660" height="12" rx="2.5" fill="url(#walnut-edge)" />
           <path d="M232 541.5H888" stroke="#D97706" strokeOpacity=".25" strokeWidth="1" />
           <path d="M232 543H888" stroke="#fff" strokeOpacity=".08" strokeWidth="1" />
+          <rect x="230" y="541" width="660" height="12" rx="2.5" fill="#000" filter="url(#wood-tex)" opacity=".55" />
+          <path d="M231 552.4H889" stroke="#000" strokeOpacity=".5" strokeWidth="1.4" />
           <ellipse cx="560" cy="534" rx="190" ry="8" fill="#60A5FA" fillOpacity=".14" />
         </g>
 
@@ -1272,6 +1421,8 @@ export default function OfficeScene({ attentive, lookX, lookY }: Props) {
           {/* brushed-aluminium grain, top-edge catch-light, lower shading */}
           <g clipPath="url(#lid-clip)">
             <rect x="468" y="406" width="184" height="122" fill="url(#lid-sheen)" />
+            <rect x="468" y="406" width="184" height="122" fill="#000" filter="url(#brushed)" opacity=".15" />
+            <path d="M474 414H520L492 520H474Z" fill="#fff" fillOpacity=".04" />
             <path d="M590 406H640L560 528H510Z" fill="#fff" fillOpacity=".045" />
             <path d="M468 410H652" stroke="#fff" strokeOpacity=".35" strokeWidth="1" />
           </g>
