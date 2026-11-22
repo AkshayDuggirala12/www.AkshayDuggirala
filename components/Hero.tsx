@@ -58,12 +58,12 @@ export default function Hero() {
     >
       <div className="mx-auto max-w-5xl text-center">
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-700 md:text-sm">
-          Software engineer · Product builder
+          Software engineer 
         </p>
         <h1 className="mt-5 text-4xl font-black leading-[1.08] tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl">
-          Building technology
+          Turning complex problems 
           <span className="block bg-gradient-to-r from-teal-600 to-sky-600 bg-clip-text text-transparent">
-            for everyday progress.
+            into simple digital solutions.
           </span>
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">

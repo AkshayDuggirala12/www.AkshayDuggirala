@@ -125,7 +125,7 @@ export default function Connect() {
                   <option value="Business Problem">Business Problem / Product Discussion</option>
                   <option value="Full-Stack Web App">Full-Stack Web App Development</option>
                   <option value="Backend & API Architecture">Backend & API Architecture</option>
-                  <option value="Native Android App">Native Android App (Kotlin)</option>
+                  <option value="Native Android App"> Android App </option>
                   <option value="Freelance/Contract Work">Freelance / Contract Work</option>
                   <option value="Full-Time Opportunity">Full-Time Opportunity</option>
                 </select>
